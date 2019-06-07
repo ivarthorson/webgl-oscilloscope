@@ -63,7 +63,7 @@
                   :fs "void main() { gl_FragColor = vec4(0, 0.0, 1.0, 1.0); }"
                   })
 
-(def sine-wave (let [ts (range 0 3.14 0.1)
+(def sine-wave (let [ts (range 0 31.4 0.1)
                      wave (map #(Math/sin %) ts)]
                  (line/linestrip3 (map vector ts wave (repeat 0.0)))))
 
@@ -105,12 +105,13 @@
                                ;; And we can also update the model rotation matrix as well:
                                (assoc-in [:uniforms :model] (geom/rotate-y mat/M44 (* t 3.14)))))
       
-      (gl/draw-with-shader (-> cog                               
+      (gl/draw-with-shader (-> cog                    
+                               (cam/apply (cam/perspective-camera (:camera s)))
                                (update-in [:attribs] dissoc :color)
                                (update-in [:uniforms] merge
                                           {:model (-> mat/M44 
                                                       ;; (geom/translate (vec/vec3 -0.48 0 0))
-                                                      (geom/rotate-x t))
+                                                      (geom/rotate-x (* 3.14 t)))
                                            :color [0 1 1 1]})))
       )))
 
