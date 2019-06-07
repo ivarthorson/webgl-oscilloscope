@@ -1,0 +1,64 @@
+body {
+    color: #ffffff;
+    font-family: verdana, tahoma;
+    font-size: 14px;
+    background-color: #202020;
+    margin: 0px;
+    border:0px;
+    padding:0px;
+}
+
+h1 {
+    display: inline;
+}
+
+table.webgl-oscilloscope-container {
+    background-color:#404040;
+    border:0;
+}
+
+td {
+    padding:0;
+    border:0
+}
+
+a {
+    text-decoration:none;
+    color: #ffb010;
+}
+
+a:hover {
+    color: #ffff00;
+}
+
+.userInput {
+    font-size: 14px;
+    padding:4px;
+    background: #202020;
+    background-color: #202020;
+    color:#ffffff;
+    border: 0px solid;
+    border-color: #808080 #808080 #808080 #808080;
+}
+
+.userInputButtons {
+    background: #505050;
+    border: 1px solid;
+    border-color: #808080;
+    color:#ffffff;
+    font-size:14px;
+}
+
+.userInputCheckbox {
+    color: #ffc040;
+    border-color: #808080;
+    background: #505050;
+    border: 1px solid;
+}
+
+.trace01 { color: #ffc040 }
+.trace02 { color: #ffffa0 }
+.trace03 { color: #a0ffc0 }
+.trace04 { color: #40c0ff }
+.trace05 { color: #d0a0ff }
+.trace06 { color: #ff80c0 }

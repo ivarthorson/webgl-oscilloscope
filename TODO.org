@@ -1,0 +1,49 @@
+* Rough Plan
+** TO DO ITEMS
+   - [X] Start with some HTML and CSS based on this:
+    http://www.iquilezles.org/apps/graphtoy/index.html
+   - [ ] Use minimalist figwheel template like in tutorial, add reagent
+   - [ ] Set up some basic state changes
+   - [ ] Look at cljs-webgl's example 6 for the keypress handlers, and steal that
+   - [ ] Make a flow-chart of "buffers" "uniforms" "vertex attributes" and "pixel fragments" on paper
+   - [ ] Find several good thi.ng demos
+     https://github.com/thi-ng/ws-ldn-1/
+     https://github.com/thi-ng/ws-ldn-2/
+   - [ ] Use CLJS-WEBGL's marginalia docs to add some new stuff
+
+
+** Follow Up Projects
+   - [ ] Try to do 2D plots in webgl with th.ing
+   - Really pretty generative mathy art
+   https://medium.com/@thi.ng/workshop-report-generative-design-with-clojure-7d6d8ea9a6e8
+   http://paulbourke.net/fractals/peterdejong/
+   - Infix math could be combined with latex: https://github.com/rm-hull/infix
+
+** Solutioning
+   + Mock up the data signals as functions of time at first,
+   + Optionally: Display the frame rate
+   + View
+     - GL Canvas
+   + Data model
+     - Ring buffers with "time" axis on backend
+     - On front end, ship LINES objects to GPU in blocks, and expire them in blocks
+     - Camera translation is f(t) -> xcoord
+     - Autoranging Y scale
+   + Controller
+     - Which signals to display (listbox)
+     - Seconds of History to display
+     - API Query update rate (1/sec, 10x/sec, etc)
+     - Time lag (0 to 1s)
+     - Y scale (manual)
+     - Y scale autorange checkbox
+   + Fill in actual data signals
+     - Pull model: client does "GET" requests to get latest state
+     - Push model: Data sent out over websockets
+
+** Things my oscope actually has
+   - Time history adjustment
+   - Time scroll left/right
+   - Independent Gain for each channel
+   - Trigger: stop, once, run
+   - Record/save to disk
+   - FFT
