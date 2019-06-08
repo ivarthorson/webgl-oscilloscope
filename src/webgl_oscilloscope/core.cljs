@@ -169,36 +169,43 @@
 
 (defn top-bar
   [user-input]
-  [:table
-   [:tbody
-    [:tr
-     [:td {:class "text-title"} "WebGL Oscilloscope"]
-     [:td {:width "30px"}]
-     [:td [:input {:type "text"
-                   :class "userInput"
-                   :size "30"
-                   :name "formula1"
-                   :default-value "http://localhost:3449/stream"}]]
-     [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
-           "Connect"]]
-     [:td {:width "30px"}]
-     [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
-           "Axes"]]
-     [:td [:button {:on-click #(swap! reagent-state update-in [:grid] (fn [x] (not x)))}
-           "Grid"]]
-     [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
-           "Auto"]]
-     [:td [:select {:class "userInput"
-                    :default-value "1"
-                    :on-change #(println "hummus")} 
-           [:option {:value "0"} "Free"]
-           [:option {:value "1"} "Something"]]]
-     [:td [:button {:on-click #(swap! reagent-state assoc-in [:run] true)}
-           "Run"]]
-     [:td [:button {:on-click #(swap! reagent-state assoc-in [:run] false)}
-           "Stop"]]
+  (let [rs @reagent-state]
+    [:table
+     [:tbody
+      [:tr
+       [:td {:class "text-title"} "WebGL Oscilloscope"]
+       [:td {:width "30px"}]
+       [:td [:input {:type "text"
+                     :class "userInput"
+                     :size "30"
+                     :name "formula1"
+                     :default-value "http://localhost:3449/stream"}]]
+       [:td [:button {:on-click #(print "TODO: Connect to websocket")}
+             "Connect"]]
+       [:td {:width "30px"}]
+       [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
+             "Axes"]]
+       [:td [:button {:on-click #(swap! reagent-state update-in [:grid] (fn [x] (not x)))}
+             "Grid"]]
+       [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+             "Auto"]]
+       [:td [:select {:class "userInput"
+                      :default-value "1"
+                      :on-change #(println "hummus")} 
+             [:option {:value "0"} "Free"]
+             [:option {:value "1"} "Something"]]]
+       [:td
+        [:input {:class "tgl tgl-skewed"
+                 :id "cb3" 
+                 :type "checkbox"
+                 :checked (:run rs)
+                 :on-click #(swap! reagent-state update-in [:run] (fn [x] (not x)))}]
+        [:label {:class "tgl-btn"
+                 :data-tg-off "STOP"
+                 :data-tg-on "RUN"
+                 :for "cb3"}]]
      
-     ]]])
+       ]]]))
 
 (defn right-bar []
   (fn []
@@ -209,7 +216,9 @@
 (defn bottom-bar []
   (fn []
     [:div
-     (str @reagent-state)]))
+    
+     [:div
+      (str @reagent-state)]]))
 
 (defn init-reagent! []
   (r/render [top-bar]    (.getElementById js/document "reagent-top-bar"))
