@@ -22,7 +22,12 @@
                             :chans [{:id 0 :source "Demo" :signal "Sine" :checked true}
                                     {:id 1 :source "Demo" :signal "sig2" :checked true}
                                     {:id 2 :source "Demo" :signal "sig3"}
-                                    {:id 3 :source "source2" :signal "sig5"}]}))
+                                    {:id 3 :source "source2" :signal "sig5"}]
+                            
+                            :x-axis true
+
+                            :run true
+                            }))
 
 (def gl-state (atom {:time         0.0 ;; seconds
                      :time-history 200 ;; seconds
@@ -115,13 +120,12 @@
                  ))
 
 (defn draw-frame! [t]
-  (swap! gl-state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
-  (swap! gl-state assoc-in [:camera :target] (thi.ng.geom.vector/vec3 t 0.0 0.0))
-  
-  ;; :target (thi.ng.geom.vector/vec3 1.0 0.0 0.0)
-
   (let [s @gl-state
         rs @reagent-state]
+    (when (:run rs)
+      (swap! gl-state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
+      (swap! gl-state assoc-in [:camera :target] (thi.ng.geom.vector/vec3 t 0.0 0.0)))
+
     (gl/clear-color-and-depth-buffer gl-ctx 0 0 0 1 1)      
     (gl/draw-with-shader gl-ctx (-> (make-buffers triangle) ;;  shaded-triangle-buffer-thing    
                                     ;; cam/apply updates the :view and :proj matrices of the hashmap
@@ -143,7 +147,8 @@
                                                     {:model (-> mat/M44 
                                                                 ;; (geom/translate (vec/vec3 -0.48 0 0))
                                                                 (geom/rotate-x (* 3.14 t)))
-                                                     :color [0 0.5 1 1]}))))))
+                                                     :color [0 0.5 1 1]}))))
+    ))
 
 
 
@@ -188,9 +193,9 @@
                     :on-change #(println "hummus")} 
            [:option {:value "0"} "Free"]
            [:option {:value "1"} "Something"]]]
-     [:td [:button {:on-click #(print "TODO: Run")}
+     [:td [:button {:on-click #(swap! reagent-state assoc-in [:run] true)}
            "Run"]]
-     [:td [:button {:on-click #(print "TODO: Stop")}
+     [:td [:button {:on-click #(swap! reagent-state assoc-in [:run] false)}
            "Stop"]]
      
      ]]])
