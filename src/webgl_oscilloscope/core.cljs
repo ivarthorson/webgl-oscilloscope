@@ -11,7 +11,9 @@
             [thi.ng.geom.matrix :as mat]
             [thi.ng.geom.polygon :as poly]
             [thi.ng.geom.triangle :as tri]
-            [thi.ng.geom.vector :as vec]))
+            [thi.ng.geom.vector :as vec]
+            [reagent.core :as r]
+            ))
 
 (enable-console-print!)
 
@@ -120,4 +122,18 @@
 ;; To rotate or translate something, 
 ;;     (update-in something [:uniforms] merge {:model (geom/rotate-x mat/M44)})
 
-(def animatino-handle (anim/animate (fn [t] (draw-frame! t) true)))
+(def animation-handle (anim/animate (fn [t] (draw-frame! t) true)))
+
+(defn home-page []
+  [:div
+   [:h3 "This is the reagent part"]])
+
+(defn mount-root []
+  (r/render [home-page] (.getElementById js/document "reagent-app")))
+
+(defn init! []
+  (print "INIT!")
+  (mount-root)
+  (print "DONE"))
+
+(init!)
