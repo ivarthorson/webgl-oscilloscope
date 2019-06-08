@@ -8,25 +8,22 @@
     <title>WebGL Oscilloscope</title>
   </head>
   <body>
-    <table border="0px">
+    <table class="webgl-oscilloscope-container"> 
+      <tr>
+        <td valign="top" align="left" colspan="2">
+          <span id="reagent-top-bar"><span class="text-title">WebGL Oscilloscope</span></span>
+        </td>
+      </tr>
       <tr>
         <td valign="top" align="left">
-          <table class="webgl-oscilloscope-container">
-            <tr>
-              <td>
-                <span id="reagent-top-bar"><span class="text-title">WebGL Oscilloscope</span></span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <canvas id="mainCanvas" width="1000" height="600">
-                  <br>
-                  <b>Sorry, you need a more modern browser to run WebGL Oscilloscope. </b>
-                  <br>
-                </canvas>
-              </td>
-            </tr>
-          </table>
+          <canvas id="mainCanvas" width="1000" height="600">
+            <br>
+            <b>Sorry, you need a more modern browser to run WebGL Oscilloscope. </b>
+            <br>
+          </canvas>
+        </td>
+        <td valign="top" align="left">
+          <span id="reagent-right-bar"></span>
         </td>
       </tr>
     </table>

@@ -17,7 +17,12 @@
 
 (enable-console-print!)
 
-(def gl-ctx (gl/gl-context "mainCanvas"))
+(def reagent-state (r/atom {:server "http://localhost:3449"
+                            
+                            :chans [{:id 0 :source "Demo" :signal "Sine" :checked true}
+                                    {:id 1 :source "Demo" :signal "sig2" :checked true}
+                                    {:id 2 :source "Demo" :signal "sig3"}
+                                    {:id 3 :source "source2" :signal "sig5"}]}))
 
 (def gl-state (atom {:time         0.0 ;; seconds
                      :time-history 200 ;; seconds
@@ -31,8 +36,6 @@
                      :grid        true
                      :grid-xticks  0.1
                      :grid-yticks  0.1
-                     :axes        true
-                     :autorange   true
 
                      ;;         view-rect (gl/get-viewport-rect gl)
                      :viewport-width  1000
@@ -47,6 +50,8 @@
                               :far  1000               ;; far clip
                               }}))
 
+(def gl-ctx (gl/gl-context "mainCanvas"))
+
 (def traces (atom []))
 
 (def shader-spec {:uniforms {:view       :mat4
@@ -56,10 +61,26 @@
                   :vs "void main() { gl_Position = proj * view * model * vec4(position, 1.0); }"
                   :fs "void main() { gl_FragColor = vec4(0, 0.0, 1.0, 1.0); }"
                   })
+;; Add a shader to make it thicker
+;; https://mattdesl.svbtle.com/drawing-lines-is-hard
+(def thick-shader-spec {:uniforms {:view       :mat4
+                                   :proj       :mat4
+                                   :model      :mat4
+                                   :normal     :vec2
+                                   :miter      :float}
+                        :attribs  {:position   :vec3}
+                        :vs "void main() { 
+                               vec2 p = position.xy + vec2(normal * thickness/2.0 * miter);
+                               gl_Position = proj * view * model * vec4(p, 0.0, 1.0);"
+                        :fs "void main() { gl_FragColor = vec4(0, 0.0, 1.0, 1.0); }"
+                        })
 
 (def sine-wave (let [ts (range 0 31.4 0.01)
                      wave (map #(Math/sin (* 5.0 %)) ts)]
                  (line/linestrip3 (map vector ts wave (repeat 0.0)))))
+
+(def x-axis (let [ts (range -100 100 1)]
+              (line/linestrip3 (map vector ts (repeat 0.0) (repeat 0.0)))))
 
 (def triangle (tri/triangle3 [[1 0 0] 
                               [0 0 0]
@@ -79,18 +100,19 @@
       (gl/make-buffers-in-spec gl-ctx glc/static-draw)))
 
 
-(def cog (-> sine-wave                       ;(poly/cog 0.5 20 [0.9 1 1 0.9])
-             (gl/as-gl-buffer-spec {:normals false :fixed-color [1 0 0 1]})
-             (gl/make-buffers-in-spec gl-ctx glc/static-draw)
-             (assoc-in [:uniforms :proj] (gl/ortho (gl/get-viewport-rect gl-ctx)))
-             (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
-             ))
+(def sine-obj (-> sine-wave
+                 (gl/as-gl-buffer-spec {:normals false :fixed-color [1 0 0 1]})
+                 (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+                 (assoc-in [:uniforms :proj] (gl/ortho (gl/get-viewport-rect gl-ctx)))
+                 (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
+                 ))
 
-(def reagent-state (r/atom {:server "http://localhost:3449"
-                            :chans [{:id 0 :source "Demo" :signal "Sine"}
-                                    {:id 1 :source "Demo" :signal "sig2" :checked true}
-                                    {:id 2 :source "Demo" :signal "sig3"}
-                                    {:id 3 :source "source2" :signal "sig5"}]}))
+(def x-axis-obj (-> x-axis
+                 (gl/as-gl-buffer-spec {:normals false :fixed-color [1 0 0 1]})
+                 (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+                 (assoc-in [:uniforms :proj] (gl/ortho (gl/get-viewport-rect gl-ctx)))
+                 (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
+                 ))
 
 (defn draw-frame! [t]
   (swap! gl-state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
@@ -107,8 +129,14 @@
                                     ;; And we can also update the model rotation matrix as well:
                                     (assoc-in [:uniforms :model] (geom/rotate-y mat/M44 (* t 3.14)))))    
     
+    (when (get-in rs [:x-axis])
+      (gl/draw-with-shader gl-ctx (-> x-axis-obj            
+                                      (cam/apply (cam/perspective-camera (:camera s)))
+                                      (update-in [:attribs] dissoc :color)
+                                      )))
+
     (when (get-in rs [:chans 0 :checked])
-      (gl/draw-with-shader gl-ctx (-> cog                    
+      (gl/draw-with-shader gl-ctx (-> sine-obj
                                       (cam/apply (cam/perspective-camera (:camera s)))
                                       (update-in [:attribs] dissoc :color)
                                       #_ (update-in [:uniforms] merge
@@ -130,45 +158,62 @@
       (for [{:keys [id source signal checked] :as c} (:chans s)]
         ^{:key (str "checkbox-chan-" id) }
         [:tr [:td [:label [:input {:type "checkbox"
-                                   ;; :checked checked # Works for setting initial state, but raises a warning
+                                   :checked checked
                                    :on-change #(swap! reagent-state assoc-in [:chans id :checked] (not checked))}]
                    [:font {:class (str "trace0" id)} (str source " / " signal)]]]])]]))
 
 (defn top-bar
   [user-input]
   [:table
-   [:tr
-    [:td {:class "text-title"} "WebGL Oscilloscope"]
-    [:td [:input {:type "text"
-                  :class "userInput"
-                  :size "30"
-                  :name "formula1"
-                  :default-value "http://localhost:3449/stream"
-                  :on-change #(println "typity")}]]
-    [:td [:button "Axes"]]
-    [:td [:button "Grid"]]
-    [:td [:button "Auto Range"]]
-    [:td [:select {:class "userInput"
-                   :on-change #(println "hummus")} 
-          [:option {:value "0" :selected true} "Free"]
-          [:option {:value "0"} "Something"]]]
-    ]]
-  )
+   [:tbody
+    [:tr
+     [:td {:class "text-title"} "WebGL Oscilloscope"]
+     [:td {:width "30px"}]
+     [:td [:input {:type "text"
+                   :class "userInput"
+                   :size "30"
+                   :name "formula1"
+                   :default-value "http://localhost:3449/stream"}]]
+     [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
+           "Connect"]]
+     [:td {:width "30px"}]
+     [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
+           "Axes"]]
+     [:td [:button {:on-click #(swap! reagent-state update-in [:grid] (fn [x] (not x)))}
+           "Grid"]]
+     [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+           "Auto"]]
+     [:td [:select {:class "userInput"
+                    :default-value "1"
+                    :on-change #(println "hummus")} 
+           [:option {:value "0"} "Free"]
+           [:option {:value "1"} "Something"]]]
+     [:td [:button {:on-click #(print "TODO: Run")}
+           "Run"]]
+     [:td [:button {:on-click #(print "TODO: Stop")}
+           "Stop"]]
+     
+     ]]])
 
-(defn home-page []
-  [:div
-   [:h3 "This is the reagent part. "]
-   [checkboxes]
+(defn right-bar []
+  (fn []
+    [:div.signal-bar
+     [:h3 "Signals"]
+     [checkboxes]]))
 
-   ])
+(defn bottom-bar []
+  (fn []
+    [:div
+     (str @reagent-state)]))
 
 (defn init-reagent! []
-  (r/render [top-bar]   (.getElementById js/document "reagent-top-bar"))
-  (r/render [home-page] (.getElementById js/document "reagent-bottom-bar")))
+  (r/render [top-bar]    (.getElementById js/document "reagent-top-bar"))
+  (r/render [right-bar]  (.getElementById js/document "reagent-right-bar"))
+  (r/render [bottom-bar] (.getElementById js/document "reagent-bottom-bar")))
 
 
 ;; -----------------------------------------------------------------------------
-;; Now start the dynamic stuff going!
+;; Now actually start everything!
 
 (init-reagent!)
 
