@@ -122,9 +122,6 @@
 ;; To rotate or translate something, 
 ;;     (update-in something [:uniforms] merge {:model (geom/rotate-x mat/M44)})
 
-(defn shortname [{:keys [source signal]}]
-  (str source "/" signal))
-
 (defn checkboxes
   []
   (let [s @reagent-state]
@@ -139,23 +136,35 @@
 
 (defn top-bar
   [user-input]
-  [:input {:type "text"
-           :class "userInput"
-           :size "90"
-           :name "formula1"
-           :value "Stuff here"
-           :on-change #(println "typity")}])
+  [:table
+   [:tr
+    [:td {:class "text-title"} "WebGL Oscilloscope"]
+    [:td [:input {:type "text"
+                  :class "userInput"
+                  :size "30"
+                  :name "formula1"
+                  :default-value "http://localhost:3449/stream"
+                  :on-change #(println "typity")}]]
+    [:td [:button "Axes"]]
+    [:td [:button "Grid"]]
+    [:td [:button "Auto Range"]]
+    [:td [:select {:class "userInput"
+                   :on-change #(println "hummus")} 
+          [:option {:value "0" :selected true} "Free"]
+          [:option {:value "0"} "Something"]]]
+    ]]
+  )
 
 (defn home-page []
   [:div
    [:h3 "This is the reagent part. "]
-   [top-bar]
    [checkboxes]
 
    ])
 
 (defn init-reagent! []
-  (r/render [home-page] (.getElementById js/document "reagent-app")))
+  (r/render [top-bar]   (.getElementById js/document "reagent-top-bar"))
+  (r/render [home-page] (.getElementById js/document "reagent-bottom-bar")))
 
 
 ;; -----------------------------------------------------------------------------

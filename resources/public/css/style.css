@@ -1,34 +1,21 @@
 body {
+    background-color: #202020;
     color: #ffffff;
     font-family: verdana, tahoma;
-    font-size: 14px;
-    background-color: #202020;
+    font-size: 14px;    
     margin: 0px;
     border:0px;
     padding:0px;
 }
 
-h1 {
-    display: inline;
+.text-title {
+    font-size: large;
+    padding: 0px 20px;
 }
 
-table.webgl-oscilloscope-container {
+.webgl-oscilloscope-container {
     background-color:#404040;
     border:0;
-}
-
-td {
-    padding:0;
-    border:0
-}
-
-a {
-    text-decoration:none;
-    color: #ffb010;
-}
-
-a:hover {
-    color: #ffff00;
 }
 
 .userInput {
@@ -43,10 +30,37 @@ a:hover {
 
 .userInputButtons {
     background: #505050;
-    border: 1px solid;
+    border: 2px solid;
     border-color: #808080;
     color:#ffffff;
     font-size:14px;
+}
+
+button {
+  background: #505050;
+  border: 1px solid #808080;
+  color:#ffffff;
+  font-size:14px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+button:active {
+  background: #e5e5e5;
+  -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+     -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+          box-shadow: inset 0px 0px 5px #c1c1c1;
+   outline: none;
+}
+
+button:hover {
+    background: #404040;
+}
+
+td {
+    padding:0;
+    border:0
 }
 
 .userInputCheckbox {
