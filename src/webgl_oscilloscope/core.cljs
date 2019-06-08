@@ -63,8 +63,8 @@
                   :fs "void main() { gl_FragColor = vec4(0, 0.0, 1.0, 1.0); }"
                   })
 
-(def sine-wave (let [ts (range 0 31.4 0.1)
-                     wave (map #(Math/sin %) ts)]
+(def sine-wave (let [ts (range 0 31.4 0.01)
+                     wave (map #(Math/sin (* 5.0 %)) ts)]
                  (line/linestrip3 (map vector ts wave (repeat 0.0)))))
 
 (def triangle (tri/triangle3 [[1 0 0] 
@@ -73,6 +73,7 @@
 
 (def my-shader
   (shaders/make-shader-from-spec gl-ctx shader-spec))
+
 
 (defn make-buffers
   "Ivar's default way to turn geometry into buffers (with proper shaders and camera) on it."
@@ -92,7 +93,8 @@
              ))
 
 (defn draw-frame! [t]
-  (swap! state assoc-in [:camera :eye] (thi.ng.geom.vector/vec3 1.0 0.0 t))
+  (swap! state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
+  (swap! state assoc-in [:camera :target] (thi.ng.geom.vector/vec3 t 0.0 0.0))
   
   ;; :target (thi.ng.geom.vector/vec3 1.0 0.0 0.0)
 
@@ -108,15 +110,14 @@
       (gl/draw-with-shader (-> cog                    
                                (cam/apply (cam/perspective-camera (:camera s)))
                                (update-in [:attribs] dissoc :color)
-                               (update-in [:uniforms] merge
+                               #_ (update-in [:uniforms] merge
                                           {:model (-> mat/M44 
                                                       ;; (geom/translate (vec/vec3 -0.48 0 0))
                                                       (geom/rotate-x (* 3.14 t)))
-                                           :color [0 1 1 1]})))
+                                           :color [0 0.5 1 1]})))
       )))
 
 ;; To rotate or translate something, 
 ;;     (update-in something [:uniforms] merge {:model (geom/rotate-x mat/M44)})
 
-(def running
-  (anim/animate (fn [t] (draw-frame! t) true)))
+(def animatino-handle (anim/animate (fn [t] (draw-frame! t) true)))
