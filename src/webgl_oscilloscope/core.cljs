@@ -19,41 +19,33 @@
 
 (def gl-ctx (gl/gl-context "mainCanvas"))
 
-(def state (atom {:server "http://localhost:3449"
+(def gl-state (atom {:time         0.0 ;; seconds
+                     :time-history 200 ;; seconds
+                     :time-lag     0.1 ;; seconds
 
-                  :chans [{:name "source1" :signals ["sig1" "sig2" "sig3"]}
-                          {:name "source2" :signals ["sig4" "sig5"]}]                          
-                  :chans-selected [{:name "source1" :signals ["sig1"]}
-                                   {:name "source2" :signals ["sig5"]}]
-
-                  :time         0.0     ;; seconds
-                  :time-history 200     ;; seconds
-                  :time-lag     0.1     ;; seconds
-
-                  :x-center     0.0
-                  :x-scale      1.0
-                  :y-center     0.0
-                  :y-scale      1.0
+                     :x-center     0.0
+                     :x-scale      1.0
+                     :y-center     0.0
+                     :y-scale      1.0
                           
-                  :grid        true
-                  :grid-xticks  0.1
-                  :grid-yticks  0.1
-                  :axes        true
-                  :autorange   true
+                     :grid        true
+                     :grid-xticks  0.1
+                     :grid-yticks  0.1
+                     :axes        true
+                     :autorange   true
 
-                  ;;         view-rect (gl/get-viewport-rect gl)
-                  :viewport-width  1000
-                  :viewport-height 600
+                     ;;         view-rect (gl/get-viewport-rect gl)
+                     :viewport-width  1000
+                     :viewport-height 600
                           
-                  :camera {:eye    (thi.ng.geom.vector/vec3 0.0 0.0 2.0)
-                           :target (thi.ng.geom.vector/vec3 0.0 0.0 0.0)
-                           :up     (thi.ng.geom.vector/vec3 0.0 1.0 0.0)
-                           :fov    30
-                           :aspect (/ 1000.0 600.0) ;; TODO: RESIZE THIS AS VIEWPORT CHANGES
-                           :near  0.1   ;; Near clip
-                           :far  1000   ;; far clip
-                           }
-                  }))
+                     :camera {:eye    (thi.ng.geom.vector/vec3 0.0 0.0 2.0)
+                              :target (thi.ng.geom.vector/vec3 0.0 0.0 0.0)
+                              :up     (thi.ng.geom.vector/vec3 0.0 1.0 0.0)
+                              :fov    30
+                              :aspect (/ 1000.0 600.0) ;; TODO: RESIZE THIS AS VIEWPORT CHANGES
+                              :near  0.1               ;; Near clip
+                              :far  1000               ;; far clip
+                              }}))
 
 (def traces (atom []))
 
@@ -94,46 +86,81 @@
              (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
              ))
 
+(def reagent-state (r/atom {:server "http://localhost:3449"
+                            :chans [{:id 0 :source "Demo" :signal "Sine"}
+                                    {:id 1 :source "Demo" :signal "sig2" :checked true}
+                                    {:id 2 :source "Demo" :signal "sig3"}
+                                    {:id 3 :source "source2" :signal "sig5"}]}))
+
 (defn draw-frame! [t]
-  (swap! state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
-  (swap! state assoc-in [:camera :target] (thi.ng.geom.vector/vec3 t 0.0 0.0))
+  (swap! gl-state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
+  (swap! gl-state assoc-in [:camera :target] (thi.ng.geom.vector/vec3 t 0.0 0.0))
   
   ;; :target (thi.ng.geom.vector/vec3 1.0 0.0 0.0)
 
-  (let [s @state]
-    (doto gl-ctx
-      (gl/clear-color-and-depth-buffer 0 0 0 1 1)
-      (gl/draw-with-shader (-> (make-buffers triangle) ;;  shaded-triangle-buffer-thing    
-                               ;; cam/apply updates the :view and :proj matrices of the hashmap
-                               (cam/apply (cam/perspective-camera (:camera s)))
-                               ;; And we can also update the model rotation matrix as well:
-                               (assoc-in [:uniforms :model] (geom/rotate-y mat/M44 (* t 3.14)))))
-      
-      (gl/draw-with-shader (-> cog                    
-                               (cam/apply (cam/perspective-camera (:camera s)))
-                               (update-in [:attribs] dissoc :color)
-                               #_ (update-in [:uniforms] merge
-                                          {:model (-> mat/M44 
-                                                      ;; (geom/translate (vec/vec3 -0.48 0 0))
-                                                      (geom/rotate-x (* 3.14 t)))
-                                           :color [0 0.5 1 1]})))
-      )))
+  (let [s @gl-state
+        rs @reagent-state]
+    (gl/clear-color-and-depth-buffer gl-ctx 0 0 0 1 1)      
+    (gl/draw-with-shader gl-ctx (-> (make-buffers triangle) ;;  shaded-triangle-buffer-thing    
+                                    ;; cam/apply updates the :view and :proj matrices of the hashmap
+                                    (cam/apply (cam/perspective-camera (:camera s)))
+                                    ;; And we can also update the model rotation matrix as well:
+                                    (assoc-in [:uniforms :model] (geom/rotate-y mat/M44 (* t 3.14)))))    
+    
+    (when (get-in rs [:chans 0 :checked])
+      (gl/draw-with-shader gl-ctx (-> cog                    
+                                      (cam/apply (cam/perspective-camera (:camera s)))
+                                      (update-in [:attribs] dissoc :color)
+                                      #_ (update-in [:uniforms] merge
+                                                    {:model (-> mat/M44 
+                                                                ;; (geom/translate (vec/vec3 -0.48 0 0))
+                                                                (geom/rotate-x (* 3.14 t)))
+                                                     :color [0 0.5 1 1]}))))))
+
+
 
 ;; To rotate or translate something, 
 ;;     (update-in something [:uniforms] merge {:model (geom/rotate-x mat/M44)})
 
-(def animation-handle (anim/animate (fn [t] (draw-frame! t) true)))
+(defn shortname [{:keys [source signal]}]
+  (str source "/" signal))
+
+(defn checkboxes
+  []
+  (let [s @reagent-state]
+    [:table
+     [:tbody
+      (for [{:keys [id source signal checked] :as c} (:chans s)]
+        ^{:key (str "checkbox-chan-" id) }
+        [:tr [:td [:label [:input {:type "checkbox"
+                                   ;; :checked checked # Works for setting initial state, but raises a warning
+                                   :on-change #(swap! reagent-state assoc-in [:chans id :checked] (not checked))}]
+                   [:font {:class (str "trace0" id)} (str source " / " signal)]]]])]]))
+
+(defn top-bar
+  [user-input]
+  [:input {:type "text"
+           :class "userInput"
+           :size "90"
+           :name "formula1"
+           :value "Stuff here"
+           :on-change #(println "typity")}])
 
 (defn home-page []
   [:div
-   [:h3 "This is the reagent part"]])
+   [:h3 "This is the reagent part. "]
+   [top-bar]
+   [checkboxes]
 
-(defn mount-root []
+   ])
+
+(defn init-reagent! []
   (r/render [home-page] (.getElementById js/document "reagent-app")))
 
-(defn init! []
-  (print "INIT!")
-  (mount-root)
-  (print "DONE"))
 
-(init!)
+;; -----------------------------------------------------------------------------
+;; Now start the dynamic stuff going!
+
+(init-reagent!)
+
+(anim/animate (fn [t] (draw-frame! t) true))
