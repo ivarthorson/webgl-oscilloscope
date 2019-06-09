@@ -23,11 +23,12 @@
                                     {:id 3 :source "source2" :signal "sig5"}]
                             
                             :show-axes true
+                            :show-grid true
+                            :show-tics true
 
-                            :right-tabe :signals
-
+                            :right-bar-tab "Signals"
                             :run true
-                            }))
+}))
 
 (def gl-state (atom {:time         0.0 ;; seconds
                      :time-history 200 ;; seconds
@@ -182,13 +183,13 @@
            "Clear"]]
      [:td {:width "30px"}]
      [:td "Cursor: "
-           [:select {:class "dropdown-input"
-                     :default-value "0"
-                     :on-change #(println "Cursor changed")} 
-            [:option {:value "0"} "None"]
-            [:option {:value "1"} "Track"]
-            [:option {:value "2"} "Horiz"]
-            [:option {:value "3"} "Vert"]]]
+      [:select {:class "dropdown-input"
+                :default-value "0"
+                :on-change #(println "Cursor changed")} 
+       [:option {:value "0"} "None"]
+       [:option {:value "1"} "Track"]
+       [:option {:value "2"} "Horiz"]
+       [:option {:value "3"} "Vert"]]]
      [:td {:width "30px"}]
      [:td "Save:"]
      [:td [:button.oscope-button
@@ -203,65 +204,53 @@
 
 
 (defn right-bar []
-  [:div
+  [:div.w3-container
    ;; The tab selection bar comes first
-   [:div {:class "w3-row"}
-    [:div {:class "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding"
-              :on-click #(swap! reagent-state assoc-in [:tab] :signals)}
-     "Signals"]
-    [:div {:class "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding"
-              :on-click #(swap! reagent-state assoc-in [:tab] :viewport)}
-     "Viewport"]
+   [widgets/tabbed-pages reagent-state [:right-bar-tab] "right-bar-tabs"
+    {"Signals"  
+     [checkboxes]
+     
+     ;; "Measure" 
+     ;; "Measurement stuff here"
 
-    [:div {:class "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding"
-              :on-click #(swap! reagent-state assoc-in [:tab] :options)}
-     "Options"]]
+     "Viewport" 
+     [:div
+      [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
+      [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
+      [widgets/simple-toggle reagent-state [:show-tics] "show-tics-toggle" "Show Tics"]
+      
+      ;; 
+      "TODO: DROPDOWN FOR MODE"
+      
 
-   ;; Next comes the tab contents   
-   [:div {:id "london"
-          :style {:display (if (= :signals (get-in @reagent-state [:tab]))
-                             "block" 
-                             "none")}}
-    [:p "London is in England"]]
 
-   [:div {:id "london"
-          :style {:display (if (= :viewport (get-in @reagent-state [:tab]))
-                             "block" 
-                             "none")}}
-    [:p "Paris in france."]]
-   
-   [:div {:id "tokyo" 
-          :style {:display (if (= :options (get-in @reagent-state [:tab]))
-                             "block" 
-                             "none")}} [:p "Tokyo, Japan."]]
+      ]
+     
+     "Options" 
+     "Options contents here"}]
 
+#_
    [:div
-    [:h3 "Horiz"]
-    [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
-          "Trace"]]
+    
+    [widgets/range-input reagent-state [:horiz-position] "Horiz Pos." -10 10 0.01 0]
+    [widgets/range-input reagent-state [:horiz-scale] "Horiz Scale" 0 1 0.01 4]
 
-
-
-    [:h3 "Signals"]
-    [checkboxes]
-   
+    [:button.oscope-button
+          {:on-click #(print "TODO: Reset Y axis zoom")}
+     "Position Out"]
+     [:button.oscope-button
+          {:on-click #(print "TODO: Reset Y axis zoom")}
+          "Zoom Out"]
+    
     [:h3 "Viewport"]      
-    [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
-    [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
-    [widgets/simple-toggle reagent-state [:show-tics] "show-tics-toggle" "Show Tics"]
-
-                                        ;[widgets/text-input reagent-state [:server-url] "Server URL"  20]
-                                        ;[widgets/text-input reagent-state [:server-url] "Update Rate" 20]
-
-                                        ;[widgets/range-input reagent-state [:time-lag] "Time Lag" 0 1 0.01 4]
-                                        ;[widgets/range-input reagent-state [:time-history] "History" 0 100 0.1 10]
-    ]
-
-   ]
-
-  )
-
-
+   
+    
+    ;;[widgets/text-input reagent-state [:server-url] "Server URL"  20]
+    ;;[widgets/text-input reagent-state [:server-url] "Update Rate" 20]
+    
+    ;;[widgets/range-input reagent-state [:time-lag] "Time Lag" 0 1 0.01 4]
+    ;;[widgets/range-input reagent-state [:time-history] "History" 0 100 0.1 10]
+    ]])
 
 (defn bottom-bar []
   (fn []

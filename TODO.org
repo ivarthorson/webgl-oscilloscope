@@ -1,8 +1,6 @@
 * Plan
-  - [ ] Bottom status bar
-    - [ ] Time: 100ms/div
-    - [ ] CH1: 200mV/div
-    - [ ] CH2: 300mV/div
+  - [X] Bottom status bar
+  - [X] Tabs
   - [ ] Axes
   - [ ] Grid
   - [ ] Orthographic view with x,y min and max
