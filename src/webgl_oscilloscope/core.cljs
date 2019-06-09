@@ -170,52 +170,71 @@
 (defn top-bar
   [user-input]
   [:table
-     [:tbody
-      [:tr                    
-       [:td {:width "30px"}]
-       [:td [:button {:on-click #(print "TODO: Clear Everything")}
-             "Clear"]]
-       [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
-             "Auto"]]
-       [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
+   [:tbody
+    [:tr
+     [:td [:button {:on-click #(print "TODO: Clear Everything")}
+           "Reset"]]    
+     [:td [:button {:on-click #(print "TODO: Clear Everything")}
+           "Clear"]]
+     [:td {:width "30px"}]
+     [:td "Cursor: "
+           [:select {:class "dropdown-input"
+                     :default-value "0"
+                     :on-change #(println "Cursor changed")} 
+            [:option {:value "0"} "None"]
+            [:option {:value "1"} "Track"]
+            [:option {:value "2"} "Horiz"]
+            [:option {:value "3"} "Vert"]]]
+     [:td {:width "30px"}]
+     [:td "Save:"]
+     [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+           "Trace"]]
+     [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+           "Image"]]
+     [:td {:width "30px"}]
+     [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
 
 
 (defn right-bar []
   [:div
-   [:h3 "Controls"]      
-   [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
-   [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]
-   [widgets/simple-toggle reagent-state [:autorange] "autorange-toggle" "Auto Range"]      
-   [widgets/text-entry reagent-state [:server-url] "Server URL"  20]
-   [widgets/text-entry reagent-state [:server-url] "Update Rate" 20]
+   [:h3 "Horiz"]
+   [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+           "Trace"]]
 
-   [:span
-    "Pressure: "
-    [:select {:class "dropdown-input"
-              :default-value "1"
-              :on-change #(println "hummus")} 
-     [:option {:value "0"} "Free"]
-     [:option {:value "1"} "Something"]]]
-
-   [widgets/slider reagent-state [:slider] 0 10 2 4]
+   [:h3 "Signals"]
+   [checkboxes]
    
-   [:div.signal-bar
-    [:h3 "Signals"]
-    [checkboxes]]])
+   [:h3 "Viewport"]      
+   [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
+   [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
+   [widgets/simple-toggle reagent-state [:show-tics] "show-tics-toggle" "Show Tics"]
+
+   ;[widgets/text-input reagent-state [:server-url] "Server URL"  20]
+   ;[widgets/text-input reagent-state [:server-url] "Update Rate" 20]
+
+   ;[widgets/range-input reagent-state [:time-lag] "Time Lag" 0 1 0.01 4]
+   ;[widgets/range-input reagent-state [:time-history] "History" 0 100 0.1 10]
+   ])
 
 
 
 (defn bottom-bar []
   (fn []
-    [:div
-     
+    [:div.options
+     "Connected to http://localhost:3000/websocket..."          
+     ]))
+
+(defn page-bottom []
+  (fn []
+    [:div     
      [:p
       (str @reagent-state)]]))
 
 (defn init-reagent! []
   (r/render [top-bar]    (.getElementById js/document "reagent-top-bar"))
   (r/render [right-bar]  (.getElementById js/document "reagent-right-bar"))
-  (r/render [bottom-bar] (.getElementById js/document "reagent-bottom-bar")))
+  (r/render [bottom-bar] (.getElementById js/document "reagent-bottom-bar"))
+  (r/render [page-bottom] (.getElementById js/document "reagent-page-bottom")))
 
 
 ;; -----------------------------------------------------------------------------

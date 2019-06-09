@@ -42,11 +42,9 @@
 
 
 
-(defn text-entry
-  "A text entry widget, styled beautifully.
-  https://material-components.github.io/material-components-web-catalog/#/component/text-field?type=outlined"
+(defn text-input
   [state-atom path-in-state text-label width]
-  [:div.text-entry
+  [:div.text-input-block
    [:label text-label ": "]
    [:input {:type "text"
             :class "text-input"
@@ -54,15 +52,16 @@
             :size (str (or width 10))
             :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))}]])
 
-(defn slider
-  "A range slider widget."
-  [state-atom path-in-state min max step default-value]
-  [:input {:type "range"
-           ;;:value value
-           :default-value default-value
-           :min min 
-           :max max
-           :step step
-           :style {:width "100%"}
-           :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
-           }])
+(defn range-input
+  [state-atom path-in-state text-label min max step default-value]
+  [:div.range-input-block
+   [:label text-label ": "]
+   [:input {:type "range"
+            ;;:value value
+            :default-value default-value
+            :min min 
+            :max max
+            :step step
+            :style {:width "100%"}
+            :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
+            }]])
