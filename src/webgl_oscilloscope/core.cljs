@@ -13,7 +13,7 @@
             [thi.ng.geom.triangle :as tri]
             [thi.ng.geom.vector :as vec]
             [reagent.core :as r]
-            ))
+            [webgl-oscilloscope.widgets :as widgets]))
 
 (enable-console-print!)
 
@@ -84,7 +84,8 @@
                      wave (map #(Math/sin (* 5.0 %)) ts)]
                  (line/linestrip3 (map vector ts wave (repeat 0.0)))))
 
-(def x-axis (let [ts (range -100 100 1)]
+;; TODO: test if only one vertex need be on screen for this to draw, or not.
+(def x-axis (let [ts (range -100 100 10)]
               (line/linestrip3 (map vector ts (repeat 0.0) (repeat 0.0)))))
 
 (def triangle (tri/triangle3 [[1 0 0] 
@@ -169,55 +170,42 @@
 
 (defn top-bar
   [user-input]
-  (let [rs @reagent-state]
-    [:table
+  [:table
      [:tbody
-      [:tr
-       [:td {:class "text-title"} "WebGL Oscilloscope"]
+      [:tr                    
        [:td {:width "30px"}]
-       [:td [:input {:type "text"
-                     :class "userInput"
-                     :size "30"
-                     :name "formula1"
-                     :default-value "http://localhost:3449/stream"}]]
-       [:td [:button {:on-click #(print "TODO: Connect to websocket")}
-             "Connect"]]
-       [:td {:width "30px"}]
+       [:td [:button {:on-click #(print "TODO: Clear Everything")}
+             "Clear"]]
        [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
              "Axes"]]
        [:td [:button {:on-click #(swap! reagent-state update-in [:grid] (fn [x] (not x)))}
              "Grid"]]
        [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
-             "Auto"]]
+             "Auto Range"]]
        [:td [:select {:class "userInput"
                       :default-value "1"
                       :on-change #(println "hummus")} 
              [:option {:value "0"} "Free"]
              [:option {:value "1"} "Something"]]]
        [:td
-        [:input {:class "tgl tgl-skewed"
-                 :id "cb3" 
-                 :type "checkbox"
-                 :checked (:run rs)
-                 :on-click #(swap! reagent-state update-in [:run] (fn [x] (not x)))}]
-        [:label {:class "tgl-btn"
-                 :data-tg-off "STOP"
-                 :data-tg-on "RUN"
-                 :for "cb3"}]]
-     
-       ]]]))
+        [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
+
 
 (defn right-bar []
-  (fn []
-    [:div.signal-bar
-     [:h3 "Signals"]
-     [checkboxes]]))
+  [:div
+   [:h3 "Controls"]      
+   [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
+   [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]
+   [widgets/simple-toggle reagent-state [:autorange] "autorange-toggle" "Auto Range"]      
+   [widgets/text-entry reagent-state [:server-url] "Server URL" "http://localhost:3999/websocket" 30]
+   [:div.signal-bar
+    [:h3 "Signals"]
+    [checkboxes]]])
 
 (defn bottom-bar []
   (fn []
     [:div
-    
-     [:div
+     [:p
       (str @reagent-state)]]))
 
 (defn init-reagent! []

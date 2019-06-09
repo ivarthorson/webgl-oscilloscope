@@ -11,11 +11,7 @@ body {
 .webgl-oscilloscope-container {
     background-color:#404040;
     border:0;
-}
-
-.webgl-oscilloscope-container td {
     padding:0;
-    border:0
 }
 
 .text-title {
@@ -60,7 +56,7 @@ button:hover {
 .trace04 { color: #d0a0ff }
 .trace05 { color: #ff80c0 }
 
-
+/* Used by all toggles */
 
 .tgl {
   display: none;
@@ -103,6 +99,8 @@ button:hover {
   left: 50%;
 }
 
+/* Light Toggle */
+
 .tgl-light + .tgl-btn {
   background: #f0f0f0;
   border-radius: 2em;
@@ -118,6 +116,8 @@ button:hover {
   background: #9FD6AE;
 }
 
+/* SKEWED RED-GREEN TOGGLE */
+
 .tgl-skewed + .tgl-btn {
   overflow: hidden;
   -webkit-transform: skew(-10deg);
@@ -126,7 +126,7 @@ button:hover {
           backface-visibility: hidden;
   transition: all .2s ease;
   font-family: sans-serif;
-  background: #888;
+  background: #F22;
 }
 .tgl-skewed + .tgl-btn:after, .tgl-skewed + .tgl-btn:before {
   -webkit-transform: skew(10deg);
@@ -156,7 +156,7 @@ button:hover {
   left: -10%;
 }
 .tgl-skewed:checked + .tgl-btn {
-  background: #86d993;
+  background: #36d933;
 }
 .tgl-skewed:checked + .tgl-btn:before {
   left: -100%;
