@@ -24,6 +24,8 @@
                             
                             :show-axes true
 
+                            :right-tabe :signals
+
                             :run true
                             }))
 
@@ -172,9 +174,11 @@
   [:table
    [:tbody
     [:tr
-     [:td [:button {:on-click #(print "TODO: Clear Everything")}
+     [:td [:button.oscope-button
+           {:on-click #(print "TODO: Clear Everything")}
            "Reset"]]    
-     [:td [:button {:on-click #(print "TODO: Clear Everything")}
+     [:td [:button.oscope-button
+           {:on-click #(print "TODO: Clear Everything")}
            "Clear"]]
      [:td {:width "30px"}]
      [:td "Cursor: "
@@ -187,34 +191,75 @@
             [:option {:value "3"} "Vert"]]]
      [:td {:width "30px"}]
      [:td "Save:"]
-     [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+     [:td [:button.oscope-button
+           {:on-click #(print "TODO: Reset Y axis zoom")}
            "Trace"]]
-     [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+     [:td [:button.oscope-button
+           {:on-click #(print "TODO: Reset Y axis zoom")}
            "Image"]]
      [:td {:width "30px"}]
      [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
 
 
+
 (defn right-bar []
   [:div
-   [:h3 "Horiz"]
-   [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
-           "Trace"]]
+   ;; The tab selection bar comes first
+   [:div {:class "w3-row"}
+    [:div {:class "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding"
+              :on-click #(swap! reagent-state assoc-in [:tab] :signals)}
+     "Signals"]
+    [:div {:class "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding"
+              :on-click #(swap! reagent-state assoc-in [:tab] :viewport)}
+     "Viewport"]
 
-   [:h3 "Signals"]
-   [checkboxes]
+    [:div {:class "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding"
+              :on-click #(swap! reagent-state assoc-in [:tab] :options)}
+     "Options"]]
+
+   ;; Next comes the tab contents   
+   [:div {:id "london"
+          :style {:display (if (= :signals (get-in @reagent-state [:tab]))
+                             "block" 
+                             "none")}}
+    [:p "London is in England"]]
+
+   [:div {:id "london"
+          :style {:display (if (= :viewport (get-in @reagent-state [:tab]))
+                             "block" 
+                             "none")}}
+    [:p "Paris in france."]]
    
-   [:h3 "Viewport"]      
-   [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
-   [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
-   [widgets/simple-toggle reagent-state [:show-tics] "show-tics-toggle" "Show Tics"]
+   [:div {:id "tokyo" 
+          :style {:display (if (= :options (get-in @reagent-state [:tab]))
+                             "block" 
+                             "none")}} [:p "Tokyo, Japan."]]
 
-   ;[widgets/text-input reagent-state [:server-url] "Server URL"  20]
-   ;[widgets/text-input reagent-state [:server-url] "Update Rate" 20]
+   [:div
+    [:h3 "Horiz"]
+    [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
+          "Trace"]]
 
-   ;[widgets/range-input reagent-state [:time-lag] "Time Lag" 0 1 0.01 4]
-   ;[widgets/range-input reagent-state [:time-history] "History" 0 100 0.1 10]
-   ])
+
+
+    [:h3 "Signals"]
+    [checkboxes]
+   
+    [:h3 "Viewport"]      
+    [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
+    [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
+    [widgets/simple-toggle reagent-state [:show-tics] "show-tics-toggle" "Show Tics"]
+
+                                        ;[widgets/text-input reagent-state [:server-url] "Server URL"  20]
+                                        ;[widgets/text-input reagent-state [:server-url] "Update Rate" 20]
+
+                                        ;[widgets/range-input reagent-state [:time-lag] "Time Lag" 0 1 0.01 4]
+                                        ;[widgets/range-input reagent-state [:time-history] "History" 0 100 0.1 10]
+    ]
+
+   ]
+
+  )
 
 
 

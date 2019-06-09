@@ -1,4 +1,8 @@
-button {
+.text-input-block { margin-top: 10px; }
+.range-input-block { margin-top: 10px; }
+.dropdown-input-block { margin-top: 10px; }
+
+.oscope-button {
   background: #505050;
   border: 1px solid #808080;
   color:#ffffff;
@@ -9,18 +13,14 @@ button {
   box-shadow: 0 4px #999;
 }
 
-button:active {
+.oscope-button:active {
   box-shadow: 0 1px #666;
   transform: translateY(3px);
 }
 
-button:hover {
+.oscope-button:hover {
     background: #404040;
 }
-
-.text-input-block { margin-top: 10px; }
-.range-input-block { margin-top: 10px; }
-.dropdown-input-block { margin-top: 10px; }
 
 .text-input {
     font-size: 14px;
@@ -39,7 +39,7 @@ button:hover {
     background: #202020;
     background-color: #202020;
     color:#ffffff;
-    border: 1px solid;
+    border: 1px solid #808080;
     border-color: #808080 #808080 #808080 #808080;
     box-shadow: 0 4px #999;
 }
