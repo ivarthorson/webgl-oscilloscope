@@ -13,18 +13,17 @@
             [thi.ng.geom.triangle :as tri]
             [thi.ng.geom.vector :as vec]
             [reagent.core :as r]
+            [cljsjs.material-components :as mdc]
             [webgl-oscilloscope.widgets :as widgets]))
 
-(enable-console-print!)
-
-(def reagent-state (r/atom {:server "http://localhost:3449"
+(def reagent-state (r/atom {:server-url "http://localhost:3449"
                             
                             :chans [{:id 0 :source "Demo" :signal "Sine" :checked true}
                                     {:id 1 :source "Demo" :signal "sig2" :checked true}
                                     {:id 2 :source "Demo" :signal "sig3"}
                                     {:id 3 :source "source2" :signal "sig5"}]
                             
-                            :x-axis true
+                            :show-axes true
 
                             :run true
                             }))
@@ -134,7 +133,7 @@
                                     ;; And we can also update the model rotation matrix as well:
                                     (assoc-in [:uniforms :model] (geom/rotate-y mat/M44 (* t 3.14)))))    
     
-    (when (get-in rs [:x-axis])
+    (when (get-in rs [:show-axes])
       (gl/draw-with-shader gl-ctx (-> x-axis-obj            
                                       (cam/apply (cam/perspective-camera (:camera s)))
                                       (update-in [:attribs] dissoc :color)
@@ -168,6 +167,7 @@
                                    :on-change #(swap! reagent-state assoc-in [:chans id :checked] (not checked))}]
                    [:font {:class (str "trace0" id)} (str source " / " signal)]]]])]]))
 
+
 (defn top-bar
   [user-input]
   [:table
@@ -176,19 +176,9 @@
        [:td {:width "30px"}]
        [:td [:button {:on-click #(print "TODO: Clear Everything")}
              "Clear"]]
-       [:td [:button {:on-click #(swap! reagent-state update-in [:x-axis] (fn [x] (not x)))}
-             "Axes"]]
-       [:td [:button {:on-click #(swap! reagent-state update-in [:grid] (fn [x] (not x)))}
-             "Grid"]]
        [:td [:button {:on-click #(print "TODO: Reset Y axis zoom")}
-             "Auto Range"]]
-       [:td [:select {:class "userInput"
-                      :default-value "1"
-                      :on-change #(println "hummus")} 
-             [:option {:value "0"} "Free"]
-             [:option {:value "1"} "Something"]]]
-       [:td
-        [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
+             "Auto"]]
+       [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
 
 
 (defn right-bar []
@@ -197,14 +187,27 @@
    [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
    [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]
    [widgets/simple-toggle reagent-state [:autorange] "autorange-toggle" "Auto Range"]      
-   [widgets/text-entry reagent-state [:server-url] "Server URL" "http://localhost:3999/websocket" 30]
+   [widgets/text-entry reagent-state [:server-url] "Server URL"  20]
+   [widgets/text-entry reagent-state [:server-url] "Update Rate" 20]
+
+   [:span
+    "Pressure: "
+    [:select {:class "dropdown-input"
+              :default-value "1"
+              :on-change #(println "hummus")} 
+     [:option {:value "0"} "Free"]
+     [:option {:value "1"} "Something"]]]
+   
    [:div.signal-bar
     [:h3 "Signals"]
     [checkboxes]]])
 
+
+
 (defn bottom-bar []
   (fn []
     [:div
+     
      [:p
       (str @reagent-state)]]))
 
@@ -220,3 +223,6 @@
 (init-reagent!)
 
 (anim/animate (fn [t] (draw-frame! t) true))
+
+
+

@@ -19,12 +19,9 @@
                    :id unique-id
                    :type "checkbox"
                    :checked (get-in s path-in-state)
-                   :on-click #(swap! state-atom update-in path-in-state (fn [x] (not x)))}]
+                   :on-change #(swap! state-atom update-in path-in-state (fn [x] (not x)))}]
           [:label {:class "tgl-btn"
-                   :for unique-id
-                   :data-tg-off "STOP"
-                   :data-tg-on "RUN"}]]
-         [:td {:width "5px"}]
+                   :for unique-id}]]
          [:td text-label]]]])))
 
 (defn run-stop-toggle
@@ -37,7 +34,7 @@
                 :id unique-id 
                 :type "checkbox"
                 :checked (get-in s path-in-state)
-                :on-click #(swap! state-atom update-in path-in-state (fn [x] (not x)))}]
+                :on-change #(swap! state-atom update-in path-in-state (fn [x] (not x)))}]
        [:label {:class "tgl-btn"
                 :for unique-id
                 :data-tg-off "STOP"
@@ -48,13 +45,12 @@
 (defn text-entry
   "A text entry widget, styled beautifully.
   https://material-components.github.io/material-components-web-catalog/#/component/text-field?type=outlined"
-  [state-atom path-in-state text-label default-value width]
-  [:div
-   [:label text-label]
+  [state-atom path-in-state text-label width]
+  [:div.text-entry
+   [:label text-label ": "]
    [:input {:type "text"
-            :class "userInput"
-            :name "formula1"
-            :default-value (or default-value "")
+            :class "text-input"
+            :value (get-in @state-atom path-in-state)
             :size (str (or width 10))
             :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))}]])
 #_

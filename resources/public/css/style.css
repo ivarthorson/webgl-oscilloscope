@@ -8,6 +8,15 @@ body {
     padding:0px;
 }
 
+h3 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.text-entry {
+    margin-top: 10px;
+}
+
 .webgl-oscilloscope-container {
     background-color:#404040;
     border:0;
@@ -39,7 +48,17 @@ button:hover {
     background: #404040;
 }
 
-.userInput {
+.text-input {
+    font-size: 14px;
+    padding:4px;
+    background: #202020;
+    background-color: #202020;
+    color:#ffffff;
+    border: 0px solid;
+    border-color: #808080 #808080 #808080 #808080;
+}
+
+.dropdown-input {
     font-size: 14px;
     padding:4px;
     background: #202020;
@@ -73,8 +92,8 @@ button:hover {
 .tgl + .tgl-btn {
   outline: 0;
   display: block;
-  width: 4em;
-  height: 2em;
+  width: 2em;
+  height: 1em;
   position: relative;
   cursor: pointer;
   -webkit-user-select: none;
@@ -127,6 +146,9 @@ button:hover {
   transition: all .2s ease;
   font-family: sans-serif;
   background: #F22;
+  width: 4em;
+  height: 2em;
+
 }
 .tgl-skewed + .tgl-btn:after, .tgl-skewed + .tgl-btn:before {
   -webkit-transform: skew(10deg);
