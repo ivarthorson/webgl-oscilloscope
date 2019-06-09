@@ -17,7 +17,7 @@ h3 {
     margin-top: 10px;
 }
 
-.webgl-oscilloscope-container {
+.webgl-oscilloscope-table {
     background-color:#404040;
     border:0;
     padding:0;
@@ -59,6 +59,7 @@ button:hover {
 }
 
 .dropdown-input {
+    margin-top: 10px;
     font-size: 14px;
     padding:4px;
     background: #202020;
