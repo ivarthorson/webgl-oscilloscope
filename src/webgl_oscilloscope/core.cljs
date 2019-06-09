@@ -157,18 +157,73 @@
 ;; To rotate or translate something, 
 ;;     (update-in something [:uniforms] merge {:model (geom/rotate-x mat/M44)})
 
+;; <input type="checkbox" id="chk2" /> <label for="chk2">Some label</label>
+
+(defn light-gray
+  [& [highlight?]]
+  (if highlight?
+    "#eeeeec" 
+    "#d3d7cf"))
+
+(defn dark-gray
+  [& [highlight?]]
+  (if highlight?
+    "#888a85"
+    "#555753"))
+
+(defn color-idx
+  "Returns a color given an index number."
+  [idx]
+  (-> [["#ef2929" "#cc0000" "#a40000"] ; Red
+        ["#fcaf3e" "#f57900" "#ce5c00"] ; orange
+        ["#fce94f" "#edd400" "#c4a000"] ; butter
+        ["#8ae234" "#73d216" "#4e9a06"] ; green
+        ["#729fcf" "#3465a4" "#204a87"] ; blue
+        ["#ad7fa8" "#75507b" "#5c3566"] ; plum
+        ["#e9b96e" "#c17d11" "#8f5902"]]   ; chocolate
+      (nth (mod idx 7)) 
+      (nth (mod (rem idx 7) 3))))
+
 (defn checkboxes
   []
   (let [s @reagent-state]
-    [:table
-     [:tbody
-      (for [{:keys [id source signal checked] :as c} (:chans s)]
-        ^{:key (str "checkbox-chan-" id) }
-        [:tr [:td [:label [:input {:type "checkbox"
-                                   :checked checked
-                                   :on-change #(swap! reagent-state assoc-in [:chans id :checked] (not checked))}]
-                   [:font {:class (str "trace0" id)} (str source " / " signal)]]]])]]))
-
+    [:div.signal-list ;;{:style {:overflow-y "scroll" :height "400px"}}
+     (for [{:keys [id source signal checked] :as c} (:chans s)]
+       ^{:key (str "checkbox-chan-" id) }
+       [:div
+        [:table {:width "100%"}
+         [:tbody
+          [:tr
+           [:td
+            [:label.eye-checkbox
+             [:input {:type "checkbox"
+                      :checked checked
+                      :on-change #(swap! reagent-state assoc-in [:chans id :checked] (not checked))}]
+             [:font {:class (str "eye-checkbox-label")
+                     :style {:color (if checked
+                                      (color-idx id)
+                                      (light-gray))} }
+              (str source " / " signal)]]]
+           [:td {:align "right"} 
+            [widgets/number-input reagent-state [:chans id :position]
+             "pos"
+             -1e100 1e100 1.0 0.0]]
+           [:td
+            [:button.tiny-button "+"]
+            [:button.tiny-button "-"]
+            [:button.tiny-button "0"]]
+           [:td {:rowspan "2"}
+            [:button.tiny-button "AUTO"]]]
+          [:tr 
+           [:td ]
+           [:td {:align "right"} 
+            [widgets/number-input reagent-state [:chans id :scale]
+             "scl"
+             1e-100 1e100 1.0 1.0]]
+           [:td
+            [:button.tiny-button "+"]
+            [:button.tiny-button "-"]
+            [:button.tiny-button "1"]]]]]])]))
 
 (defn top-bar
   [user-input]
@@ -182,6 +237,14 @@
            {:on-click #(print "TODO: Clear Everything")}
            "Clear"]]
      [:td {:width "30px"}]
+     [:td "Save:"]
+     [:td [:button.oscope-button
+           {:on-click #(print "TODO: Reset Y axis zoom")}
+           "Trace"]]
+     [:td [:button.oscope-button
+           {:on-click #(print "TODO: Reset Y axis zoom")}
+           "Image"]]
+     [:td {:width "30px"}]
      [:td "Cursor: "
       [:select {:class "dropdown-input"
                 :default-value "0"
@@ -191,16 +254,7 @@
        [:option {:value "2"} "Horiz"]
        [:option {:value "3"} "Vert"]]]
      [:td {:width "30px"}]
-     [:td "Save:"]
-     [:td [:button.oscope-button
-           {:on-click #(print "TODO: Reset Y axis zoom")}
-           "Trace"]]
-     [:td [:button.oscope-button
-           {:on-click #(print "TODO: Reset Y axis zoom")}
-           "Image"]]
-     [:td {:width "30px"}]
      [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
-
 
 
 (defn right-bar []

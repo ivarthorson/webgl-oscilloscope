@@ -1,3 +1,13 @@
+LEFT OFF
+- Make pretty drowdown select widgets
+- Improve styling on tabs
+- For each signal,
+  - visible eye" checkboxes
+  - Color of text is grey or colored when visible
+  - "Pos +30.2", "Scl 23.0/div" 
+  - Pos +/- buttons, RST
+  - SCL +/- buttons, RST
+
 * Plan
   - [X] Bottom status bar
   - [X] Tabs

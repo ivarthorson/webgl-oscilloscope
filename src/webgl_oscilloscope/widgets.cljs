@@ -66,6 +66,19 @@
             :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
             }]])
 
+(defn number-input
+  [state-atom path-in-state text-label min max step default-value]
+  [:div.number-input-block
+   [:label text-label ": "]
+   [:input {:type "number"
+            :default-value default-value
+            :min min
+            :max max
+            :step step
+            :class "number-input"
+            :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
+            }]])
+
 (defn tabbed-pages
   "Tabs across the top, and immediately below are the contents.
   TAB-DEFINITION-HASH has KEYS (must be strings!) that are the displayed
@@ -94,3 +107,4 @@
             ^{:key id}
             [:div {:id id :style {:display (if (= k k-selected) "block" "none")}}
              v]))]])))
+

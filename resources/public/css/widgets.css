@@ -22,6 +22,24 @@
     background: #404040;
 }
 
+.number-input {
+    font-size: 14px;
+    padding: 0px 4px;
+    background: #202020;
+    background-color: #202020;
+    color:#ffffff;
+    border: 0px solid;
+    border-color: #808080;
+    width: 50px;
+}
+
+/* Turn off number input spin buttons */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
 .text-input {
     font-size: 14px;
     padding:4px;
@@ -43,3 +61,36 @@
     border-color: #808080 #808080 #808080 #808080;
     box-shadow: 0 4px #999;
 }
+
+input[type=checkbox]:before {
+    content:""; 
+    display:inline-block;
+    width:15px;
+    height:14px; 
+    background: darkgrey;
+    background-image: url('/eye-slash.svg');
+    opacity: 1;
+}
+
+input[type=checkbox]:checked:before {
+    background: lightgrey;
+    background-image: url('/eye.svg');
+}
+
+.eye-checkbox-label {
+    margin: 10px;
+    font-weight: bold;
+}
+
+
+.tiny-button {
+  background: #505050;
+  border: 1px solid #808080;
+  color:#ffffff;
+  font-size:14px;
+  padding: 0px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+
