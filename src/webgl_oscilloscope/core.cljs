@@ -196,6 +196,8 @@
               :on-change #(println "hummus")} 
      [:option {:value "0"} "Free"]
      [:option {:value "1"} "Something"]]]
+
+   [widgets/slider reagent-state [:slider] 0 10 2 4]
    
    [:div.signal-bar
     [:h3 "Signals"]

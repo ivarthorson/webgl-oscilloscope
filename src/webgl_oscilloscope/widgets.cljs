@@ -53,7 +53,7 @@
             :value (get-in @state-atom path-in-state)
             :size (str (or width 10))
             :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))}]])
-#_
+
 (defn slider
   "A range slider widget."
   [state-atom path-in-state min max step default-value]
@@ -64,4 +64,5 @@
            :max max
            :step step
            :style {:width "100%"}
-           :on-change #(swap! state-atom assoc-in path-in-state (.> % .-target .-value))}])
+           :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
+           }])
