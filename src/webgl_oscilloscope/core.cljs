@@ -13,7 +13,6 @@
             [thi.ng.geom.triangle :as tri]
             [thi.ng.geom.vector :as vec]
             [reagent.core :as r]
-            [cljsjs.material-components :as mdc]
             [webgl-oscilloscope.widgets :as widgets]))
 
 (def reagent-state (r/atom {:server-url "http://localhost:3449"
@@ -79,7 +78,7 @@
                         :fs "void main() { gl_FragColor = vec4(0, 0.0, 1.0, 1.0); }"
                         })
 
-(def sine-wave (let [ts (range 0 31.4 0.01)
+(def sine-wave (let [ts (range 0 314.0 0.01)
                      wave (map #(Math/sin (* 5.0 %)) ts)]
                  (line/linestrip3 (map vector ts wave (repeat 0.0)))))
 
