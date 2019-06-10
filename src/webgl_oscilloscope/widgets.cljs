@@ -1,10 +1,6 @@
 (ns webgl-oscilloscope.widgets)
 
-;; HTML Widgets
-;; Requires "widgets.css"
-
-;; TODO: Consider replacing with
-;; https://github.com/material-components/material-components-web/tree/master/packages/mdc-switch
+;; Simple HTML Widgets that have no dependencies except "widgets.css"
 
 (defn simple-toggle 
   "A toggle widget that will control the boolean at (get-in STATE-ATOM PATH-IN-STATE)."
@@ -40,8 +36,6 @@
                 :data-tg-off "STOP"
                 :data-tg-on "RUN"}]])))
 
-
-
 (defn text-input
   [state-atom path-in-state text-label width]
   [:div.text-input-block
@@ -57,27 +51,24 @@
   [:div.range-input-block
    [:label text-label ": "]
    [:input {:type "range"
-            ;;:value value
-            :default-value default-value
             :min min 
             :max max
             :step step
+            :value (get-in @state-atom path-in-state default-value)
             :style {:width "100%"}
-            :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
-            }]])
+            :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))}]])
 
 (defn number-input
   [state-atom path-in-state text-label min max step default-value]
   [:div.number-input-block
    [:label text-label ": "]
    [:input {:type "number"
-            :default-value default-value
             :min min
             :max max
             :step step
             :class "number-input"
-            :on-change #(swap! state-atom assoc-in path-in-state (js/Number (-> % .-target .-value)))
-            }]])
+            :value (get-in @state-atom path-in-state default-value)
+            :on-change #(swap! state-atom assoc-in path-in-state (js/Number (-> % .-target .-value)))}]])
 
 (defn tabbed-pages
   "Tabs across the top, and immediately below are the contents.

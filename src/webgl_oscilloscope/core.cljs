@@ -9,7 +9,7 @@
 (def reagent-state 
   (r/atom {:server-url "http://localhost:3449"
                             
-           :chans [{:source "Demo" :signal "Sine" :checked true}
+           :chans [{:source "Demo" :signal "Sine" :checked true :position 0 :scale 1.0}
                    {:source "Demo" :signal "Square" :checked true}
                    {:source "Demo" :signal "Triangle"}]
                             
@@ -18,63 +18,58 @@
            :show-tics true
 
            :right-bar-tab "Signals"
+
            :run true
            }))
 
 (def traces (atom []))
 
-
-(defn signal-list
-  []
-  (fn []
-    (let [s @reagent-state]
-      [:div.signal-list ;;{:style {:overflow-y "scroll" :height "400px"}}
-       [:table {:width "100%"}
-        [:tbody
-         (loop [chans (map-indexed vector (:chans s))
-                rows []]
-           (if (empty? chans)
-             rows
-             (let [[idx {:keys [source signal checked] :as c}] (first chans)]
-               (recur (next chans)
-                      (concat rows 
-                              [^{:key (str "checkbox-chan-" idx) }
-                               [:tr
-                                [:td
-                                 [:label.eye-checkbox
-                                  [:input {:type "checkbox"
-                                           :checked checked
-                                           :on-change #(swap! reagent-state assoc-in [:chans idx :checked] (not checked))}]
-                                  [:font {:class (str "eye-checkbox-label")
-                                          :style {:color (if checked
-                                                           (color/color-idx idx)
-                                                           (color/light-gray))} }
-                                   (str source " / " signal)]]]
-                                [:td {:align "right"} 
-                                 [widgets/number-input reagent-state [:chans idx :position]
-                                  "pos"
-                                  -1E100 1E100 1.0 0.0]]
-                                [:td
-                                 [:button.tiny-button "+"]
-                                 [:button.tiny-button "-"]
-                                 [:button.tiny-button "0"]]
-                                [:td {:row-span "2"}
-                                 [:button.tiny-button "AUTO"]]]
-                    
-                               ;; Second row
-                               ^{:key (str "checkbox-chan-extra-" idx) }
-                               [:tr 
-                                [:td ]
-                                [:td {:align "right"} 
-                                 [widgets/number-input reagent-state [:chans idx :scale]
-                                  "scl"
-                                  1e-100 1e100 1.0 1.0]]
-                                [:td
-                                 [:button.tiny-button "+"]
-                                 [:button.tiny-button "-"]
-                                 [:button.tiny-button "1"]]]])))
-             )
-           )]]])))
+(defn signal-list []
+  (let [s @reagent-state]
+    [:div.signal-list ;;{:style {:overflow-y "scroll" :height "400px"}}
+     [:table {:width "100%"}
+      [:tbody
+       (loop [chans (map-indexed vector (:chans s))
+              rows []]
+         (if (empty? chans)
+           rows
+           (let [[idx {:keys [source signal checked] :as c}] (first chans)]
+             (recur (next chans)
+                    (concat rows 
+                            [;; First row
+                             ^{:key (str "checkbox-chan-name-row" idx) }
+                             [:tr
+                              [:td {:col-span "6"}
+                               [:label.eye-checkbox
+                                [:input {:type "checkbox"
+                                         :checked checked
+                                         :on-change #(swap! reagent-state assoc-in [:chans idx :checked] (not checked))}]
+                                [:font {:class (str "eye-checkbox-label")
+                                        :style {:color (if checked
+                                                         (color/color-idx idx)
+                                                         (color/light-gray))} }
+                                 (str source " / " signal)]]]
+]                    
+                             ;; Second row
+                             ^{:key (str "checkbox-chan-control-row-" idx) }
+                             [:tr
+                              [:td {:width "15px"}]
+                              [:td {:align "right"} 
+                               [widgets/number-input reagent-state [:chans idx :position]
+                                "pos" -1E100 1E100 1.0 0.0]]
+                              [:td
+                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position] (partial +  1))} "+"]
+                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position] (partial + -1))} "-"]
+                               [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:chans idx :position] 0)} "0"]]
+                              [:td {:align "right"}
+                               [widgets/number-input reagent-state [:chans idx :scale]
+                                "scl" 1e-100 1e100 1.0 1.0]]
+                              [:td
+                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :scale] (partial * 2.0))} "+"]
+                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :scale] (partial * 0.5))} "-"]
+                               [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:chans idx :scale] 1.0)} "1"]]
+                              [:td 
+                               [:button.tiny-button "Auto"]]]])))))]]]))
 
 (defn top-bar
   [user-input]
@@ -112,11 +107,13 @@
   [:div.w3-container
    ;; The tab selection bar comes first
    [widgets/tabbed-pages reagent-state [:right-bar-tab] "right-bar-tabs"
-    {"Signals"  
-     [signal-list]
+    {"Signals"
+     [:div 
+      ;;[:h3 "Signals"]
+      [signal-list]]
      
-     ;; "Measure" 
-     ;; "Measurement stuff here"
+     ;"Measure" 
+     ;"Measurement stuff here"
 
      "Viewport" 
      [:div
@@ -134,18 +131,9 @@
      "Options" 
      "Options contents here"}]
 
-#_
+   #_
    [:div
     
-    [widgets/range-input reagent-state [:horiz-position] "Horiz Pos." -10 10 0.01 0]
-    [widgets/range-input reagent-state [:horiz-scale] "Horiz Scale" 0 1 0.01 4]
-
-    [:button.oscope-button
-          {:on-click #(print "TODO: Reset Y axis zoom")}
-     "Position Out"]
-     [:button.oscope-button
-          {:on-click #(print "TODO: Reset Y axis zoom")}
-          "Zoom Out"]
     
     [:h3 "Viewport"]      
    
@@ -178,7 +166,7 @@
 ;; -----------------------------------------------------------------------------
 ;; Now actually start everything!
 
-(defonce unused-reagent-handle (init-reagent!))
+(init-reagent!)
 
 (defonce unused-animate-handle 
   (anim/animate (fn [t] 

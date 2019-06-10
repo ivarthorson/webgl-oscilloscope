@@ -1,0 +1,2 @@
+  [widgets/range-input reagent-state [:horiz-position] "Horiz Pos." -10 10 0.01 0]
+    [widgets/range-input reagent-state [:horiz-scale] "Horiz Scale" 0 1 0.01 4]
