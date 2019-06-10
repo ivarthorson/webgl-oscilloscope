@@ -92,13 +92,10 @@
            "Image"]]
      [:td {:width "30px"}]
      [:td "Cursor: "
-      [:select {:class "dropdown-input"
-                :default-value "0"
-                :on-change #(println "Cursor changed")} 
-       [:option {:value "0"} "None"]
-       [:option {:value "1"} "Track"]
-       [:option {:value "2"} "Horiz"]
-       [:option {:value "3"} "Vert"]]]
+      [widgets/dropdown-input reagent-state [:cursor] "cursor-mode-dropdown" [["None" "None"]
+                                                                              ["Track" "Track"]
+                                                                              ["Horiz" "Horiz"]
+                                                                              ["Vert" "Vert"]]]]
      [:td {:width "30px"}]
      [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
 

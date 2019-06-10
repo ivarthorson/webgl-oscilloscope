@@ -99,3 +99,13 @@
             [:div {:id id :style {:display (if (= k k-selected) "block" "none")}}
              v]))]])))
 
+
+(defn dropdown-input
+  [state-atom path-in-state unique-id options-tuples]
+  [:select {:class "dropdown-input"
+            :value (or (get-in @state-atom path-in-state)
+                       (first (first options-tuples)))
+            :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))} 
+   (for [[val name] options-tuples]
+     ^{:key (str "dropdown-input-" unique-id "-" val)}
+     [:option {:value val} name])])
