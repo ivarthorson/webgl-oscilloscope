@@ -33,7 +33,7 @@
               rows []]
          (if (empty? chans)
            rows
-           (let [[idx {:keys [source signal checked] :as c}] (first chans)]
+           (let [[idx {:keys [source signal] :as c}] (first chans)]
              (recur (next chans)
                     (concat rows 
                             [;; First row
@@ -42,14 +42,14 @@
                               [:td {:col-span "6"}
                                [:label.eye-checkbox
                                 [:input {:type "checkbox"
-                                         :checked checked
-                                         :on-change #(swap! reagent-state assoc-in [:chans idx :checked] (not checked))}]
+                                         :checked (get-in @reagent-state [:chans idx :checked] false)
+                                         :on-change #(swap! reagent-state update-in [:chans idx :checked] (fn [x] (not x)))}]
                                 [:font {:class (str "eye-checkbox-label")
-                                        :style {:color (if checked
+                                        :style {:color (if (get-in @reagent-state [:chans idx :checked] false)
                                                          (color/color-idx idx)
                                                          (color/light-gray))} }
-                                 (str source " / " signal)]]]
-]                    
+                                 (str source " / " signal)]]]]
+                             
                              ;; Second row
                              ^{:key (str "checkbox-chan-control-row-" idx) }
                              [:tr

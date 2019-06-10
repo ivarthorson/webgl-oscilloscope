@@ -14,7 +14,7 @@
           [:input {:class "tgl tgl-light"
                    :id unique-id
                    :type "checkbox"
-                   :checked (get-in s path-in-state)
+                   :checked (get-in s path-in-state false)
                    :on-change #(swap! state-atom update-in path-in-state (fn [x] (not x)))}]
           [:label {:class "tgl-btn"
                    :for unique-id}]]
@@ -29,7 +29,7 @@
        [:input {:class "tgl tgl-skewed"
                 :id unique-id 
                 :type "checkbox"
-                :checked (get-in s path-in-state)
+                :checked (get-in s path-in-state false)
                 :on-change #(swap! state-atom update-in path-in-state (fn [x] (not x)))}]
        [:label {:class "tgl-btn"
                 :for unique-id
@@ -42,7 +42,7 @@
    [:label text-label ": "]
    [:input {:type "text"
             :class "text-input"
-            :value (get-in @state-atom path-in-state)
+            :value (get-in @state-atom path-in-state "")
             :size (str (or width 10))
             :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))}]])
 
