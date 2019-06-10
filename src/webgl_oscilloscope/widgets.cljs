@@ -76,7 +76,7 @@
             :max max
             :step step
             :class "number-input"
-            :on-change #(swap! state-atom assoc-in path-in-state (-> % .-target .-value))
+            :on-change #(swap! state-atom assoc-in path-in-state (js/Number (-> % .-target .-value)))
             }]])
 
 (defn tabbed-pages

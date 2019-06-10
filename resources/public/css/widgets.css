@@ -60,6 +60,7 @@ input[type=number]::-webkit-outer-spin-button {
     border: 1px solid #808080;
     border-color: #808080 #808080 #808080 #808080;
     box-shadow: 0 4px #999;
+    cursor: pointer;
 }
 
 input[type=checkbox]:before {
@@ -70,6 +71,7 @@ input[type=checkbox]:before {
     background: darkgrey;
     background-image: url('/eye-slash.svg');
     opacity: 1;
+    cursor: pointer;
 }
 
 input[type=checkbox]:checked:before {
@@ -80,6 +82,7 @@ input[type=checkbox]:checked:before {
 .eye-checkbox-label {
     margin: 10px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 
