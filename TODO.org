@@ -1,12 +1,10 @@
-LEFT OFF
-- Enforce min, max values when using buttons
-- Improve styling on tabs
-
 * Plan
   - [X] Bottom status bar
   - [X] Tabs
+  - [ ] Enforce min, max values when using buttons
   - [ ] Axes
   - [ ] Grid
+  - [ ] Tics
   - [ ] Orthographic view with x,y min and max
   - [X] Horizontal Controls
     - [X] Position +/-
@@ -26,10 +24,8 @@ LEFT OFF
     - [ ] Expiration process
     - [ ] Check garbage collection
   - [ ] Listbox of all traces
-    - [ ] Clear all button
-    - [ ] Thicker traces
-    - [ ] Joystick code from thesis
-  - [ ] Look at cljs-webgl's example 6 for the keypress handlers, and steal that 
+  - [ ] Clear all button
+  - [ ] GL draw thicker traces
 
 * For Write-Up
   - [ ] Release GIT hub
@@ -43,7 +39,6 @@ LEFT OFF
     - [ ] Display diff between two cursors
   - [ ] Vertical Measurement Mode
   - [ ] Horizontal Measurement mode
-  - [ ]     - [ ] All history (at 
   - [ ] Add measurements
     - [ ] V_mean
     - [ ] V_RMS, Vpp
@@ -59,3 +54,7 @@ LEFT OFF
   - [ ] Wraparound X mode (mod width of viewport)
   - [ ] X-Y plot mode
   - [ ] FFT
+
+* Supplementary
+  - [ ] Look at cljs-webgl's example 6 for the keypress handlers, and steal that 
+  - [ ] Joystick code from thesis
