@@ -1,12 +1,6 @@
 LEFT OFF
-- Make pretty drowdown select widgets
+- Enforce min, max values when using buttons
 - Improve styling on tabs
-- For each signal,
-  - visible eye" checkboxes
-  - Color of text is grey or colored when visible
-  - "Pos +30.2", "Scl 23.0/div" 
-  - Pos +/- buttons, RST
-  - SCL +/- buttons, RST
 
 * Plan
   - [X] Bottom status bar
@@ -14,20 +8,20 @@ LEFT OFF
   - [ ] Axes
   - [ ] Grid
   - [ ] Orthographic view with x,y min and max
-  - [ ] Horizontal Controls
-    - [ ] Position +/-
-    - [ ] Scale +/-
-    - [ ] Zero
-  - [ ] Vertical Controls, per channel
-    - [ ] Position +/-
-    - [ ] Scale +/-
-    - [ ] Zero
-    - [ ] Autorange button
+  - [X] Horizontal Controls
+    - [X] Position +/-
+    - [X] Scale +/-
+    - [X] Zero
+  - [X] Vertical Controls, per channel
+    - [X] Position +/-
+    - [X] Scale +/-
+    - [X] Zero
+    - [X] Autorange button
   - [ ] Text Labels in WebGL
-  - [ ] Traces
+  - [-] Traces
     - [ ] Listbox of all traces
-    - [ ] List of active traces
-  - [ ] Traces
+    - [X] List of active traces
+  - [ ] Trace fragments
     - [ ] Adding process
     - [ ] Expiration process
     - [ ] Check garbage collection

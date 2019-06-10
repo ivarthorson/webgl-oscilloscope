@@ -82,7 +82,7 @@
      [:td [:button.oscope-button
            {:on-click #(print "TODO: Clear history")}
            "Clear"]]
-     [:td {:width "30px"}]
+     [:td {:width "10px"}]
      [:td "Save:"]
      [:td [:button.oscope-button
            {:on-click #(print "TODO: Save CSV of traces")}
@@ -90,13 +90,28 @@
      [:td [:button.oscope-button
            {:on-click #(print "TODO: Save PNG of traces")}
            "Image"]]
-     [:td {:width "30px"}]
-     [:td "Cursor: "
+     [:td {:width "10px"}]
+    #_ [:td "Cursor: "
       [widgets/dropdown-input reagent-state [:cursor] "cursor-mode-dropdown" [["None" "None"]
                                                                               ["Track" "Track"]
                                                                               ["Horiz" "Horiz"]
                                                                               ["Vert" "Vert"]]]]
-     [:td {:width "30px"}]
+     [:td {:align "right"} 
+      [widgets/number-input reagent-state [:x-position]
+       "Time Lag" -1E100 1E100 1.0 0.0]]
+     [:td
+      [:button.tiny-button {:on-click #(swap! reagent-state update-in [:x-position] (partial +  1))} "+"]
+      [:button.tiny-button {:on-click #(swap! reagent-state update-in [:x-position] (partial + -1))} "-"]
+      [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:x-position] 0)} "0"]]
+     [:td {:align "right"}
+      [widgets/number-input reagent-state [:x-scale]
+       "Hist" 0.1 1000 1.0 1.0]]
+     [:td
+      [:button.tiny-button {:on-click #(swap! reagent-state update-in [:x-scale] (partial * 2.0))} "+"]
+      [:button.tiny-button {:on-click #(swap! reagent-state update-in [:x-scale] (partial * 0.5))} "-"]
+      [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:x-scale] 1.0)} "1"]]
+     
+     [:td {:width "15px"}]
      [:td [widgets/run-stop-toggle reagent-state [:run] "run-stop-toggle"]]]]])
 
 
@@ -109,8 +124,8 @@
       ;;[:h3 "Signals"]
       [signal-list]]
      
-     ;"Measure" 
-     ;"Measurement stuff here"
+     "Measure" 
+     "Measurement stuff here"
 
      "Viewport" 
      [:div

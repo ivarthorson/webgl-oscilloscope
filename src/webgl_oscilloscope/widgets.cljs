@@ -84,8 +84,8 @@
         (for [k (keys tab-definition-hash)]
           ^{:key (str "tabbed-sidebar-" unique-id "-tab-" k)}
           [:div {:class (if (= k k-selected)
-                          "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding w3-border-red"
-                          "w3-third tablink w3-bottombar w3-hover-light-grey w3-padding")
+                          "tabbed-page-tab tabbed-page-tab-selected" 
+                          "tabbed-page-tab")
                  :on-click #(swap! state-atom assoc-in path-in-state k)}
            k])]
 

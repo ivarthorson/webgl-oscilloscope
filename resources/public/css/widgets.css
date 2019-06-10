@@ -85,6 +85,38 @@ input[type=checkbox]:checked:before {
     cursor: pointer;
 }
 
+.tabbed-pages {
+}
+
+.tabbed-pages-topbar {
+    overflow: hidden;
+}
+
+.tabbed-page-tab {
+    font-weight: bold;
+    float: left;
+    outline: none;
+    cursor: pointer;
+    border-radius: 10px 10px 0px 0px;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.tabbed-page-tab:hover {
+    background: #808080;
+}
+
+.tabbed-pages-contents {
+    border: 2px solid #606060;
+    border-radius: 0px 0px 10px 10px;
+    padding: 5px;
+    height: 600px;
+}
+
+.tabbed-page-tab-selected {
+    background: #606060;
+    border-radius: 10px 10px 0px 0px;
+}
 
 .tiny-button {
   background: #505050;
