@@ -67,8 +67,25 @@
 
 
 ;; TODO: test if only one vertex need be on screen for this to draw, or not.
-(def x-axis (let [ts (range -100 100 10)]
-              (line/linestrip3 (map vector ts (repeat 0.0) (repeat 0.0)))))
+(def x-axis (line/linestrip3 (map vector (range -100 100 10) (repeat 0.0) (repeat 0.0))))
+(def y-axis (line/linestrip3 (map vector (repeat 0.0) (range -100 100 10) (repeat 0.0))))
+
+(def grid (let [xmin -5.0                      ;; Grid min/max
+                xmax  5.0                      ;; Grid min/max
+                xg 0.1                         ;; Grid spacing
+                ymin -5.0 
+                ymax  5.0 
+                yg 0.2]
+            ;; TODO: This should be LINES type, but that doesn't fucking exist?!
+            (line/linestrip3 
+             (concat 
+              (apply concat (for [x (range xmin xmax (* 2.0 xg))] ;; Vertical lines of grid
+                              [[x ymin 0.0] [x ymax 0]
+                               [[(+ xg x) ymax 0] (+ x xg) ymin 0.0]]))
+
+              (apply concat (for [y (range ymin ymax (* 2.0 yg))] ;; Horizontal lines of grid
+                              [[xmin y 0.0] [xmax y 0]
+                               [xmax (+ yg y) 0] [xmin (+ yg y) 0.0 ]]))))))
 
 (def sine-wave (let [ts (range 0 314.0 0.01)
                      wave (map #(Math/sin (* 5.0 %)) ts)]
@@ -103,7 +120,23 @@
                  (gl/make-buffers-in-spec gl-ctx glc/static-draw)
                  (assoc-in [:uniforms :proj] (gl/ortho (gl/get-viewport-rect gl-ctx)))
                  (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
-                 ))
+                 (update-in [:attribs] dissoc :color)
+                 (update-in [:uniforms] merge {:color [1 1 1 1]})))
+
+(def y-axis-obj (-> y-axis
+                 (gl/as-gl-buffer-spec {:normals false :fixed-color [1 0 0 1]})
+                 (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+                 (assoc-in [:uniforms :proj] (gl/ortho (gl/get-viewport-rect gl-ctx)))
+                 (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
+                 (update-in [:attribs] dissoc :color)
+                 (update-in [:uniforms] merge {:color [1 1 1 1]})))
+
+(def grid-obj (-> grid
+                 (gl/as-gl-buffer-spec {:normals false :fixed-color [1 0 0 1]})
+                 (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+                 (assoc-in [:uniforms :proj] (gl/ortho (gl/get-viewport-rect gl-ctx)))
+                 (assoc :shader (shaders/make-shader-from-spec gl-ctx (shaders-basic/make-shader-spec-2d false)))
+                 (update-in [:attribs] dissoc :color)))
 
 (defn draw-frame! [rs t]
   (let [s @gl-state]
@@ -118,17 +151,18 @@
                                     (cam/apply (cam/perspective-camera (:camera s)))
                                     ;; And we can also update the model rotation matrix as well:
                                     (assoc-in [:uniforms :model] (geom/rotate-y mat/M44 (* t 3.14)))))    
+
+    (when (get-in rs [:show-grid])
+      (gl/draw-with-shader gl-ctx grid-obj))
     
     (when (get-in rs [:show-axes])
-      (gl/draw-with-shader gl-ctx (-> x-axis-obj            
-                                      (cam/apply (cam/perspective-camera (:camera s)))
-                                      (update-in [:attribs] dissoc :color)
-                                      )))
+      (gl/draw-with-shader gl-ctx x-axis-obj)
+      (gl/draw-with-shader gl-ctx y-axis-obj))
 
+    
     (when (get-in rs [:chans 0 :checked])
       (gl/draw-with-shader gl-ctx (-> sine-obj
                                       (cam/apply (cam/perspective-camera (:camera s)))
                                       (update-in [:attribs] dissoc :color)
                                       (update-in [:uniforms] merge
-                                                 {:color [0 0 1 1] ;;(color/color-rgba 2)
-                                                  }))))))
+                                                 {:color (color/color-rgba 0)}))))))

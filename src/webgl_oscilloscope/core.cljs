@@ -3,6 +3,7 @@
             [thi.ng.geom.gl.webgl.animator :as anim]
             [reagent.core :as r]
             [webgl-oscilloscope.color :as color]
+            [webgl-oscilloscope.traces :as traces]
             [webgl-oscilloscope.webgl :as webgl]
             [webgl-oscilloscope.widgets :as widgets]))
 
@@ -23,8 +24,6 @@
 
            :run true
            }))
-
-(def traces (atom []))
 
 (defn signal-list []
   (let [s @reagent-state]
