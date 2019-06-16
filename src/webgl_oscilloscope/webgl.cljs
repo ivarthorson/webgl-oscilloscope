@@ -108,6 +108,7 @@
       (gl/make-buffers-in-spec gl-ctx glc/static-draw)))
 
 
+;; TODO: make objects and put them in the signals thing
 (def sine-obj (-> sine-wave
                  (gl/as-gl-buffer-spec {:normals false :fixed-color [1 0 0 1]})
                  (gl/make-buffers-in-spec gl-ctx glc/static-draw)
@@ -159,7 +160,8 @@
       (gl/draw-with-shader gl-ctx x-axis-obj)
       (gl/draw-with-shader gl-ctx y-axis-obj))
 
-    
+
+    ;; TODO: make this a for loop for all signals
     (when (get-in rs [:chans 0 :checked])
       (gl/draw-with-shader gl-ctx (-> sine-obj
                                       (cam/apply (cam/perspective-camera (:camera s)))

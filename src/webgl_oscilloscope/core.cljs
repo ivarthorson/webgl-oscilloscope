@@ -18,7 +18,6 @@
                             
            :show-axes true
            :show-grid true
-           :show-tics true
 
            :right-bar-tab "Signals"
 
@@ -80,7 +79,7 @@
    [:tbody
     [:tr
      [:td [:button.oscope-button
-           {:on-click #(print "TODO: Clear history")}
+           {:on-click #(swap! reagent-state assoc :t0 0.0)}
            "Clear"]]
      [:td {:width "10px"}]
      [:td "Save:"]
@@ -136,13 +135,14 @@
       [:h4 "Visual Aids"]
       [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
       [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
-      [widgets/simple-toggle reagent-state [:show-tics] "show-tics-toggle" "Show Tics"]
+      [widgets/number-input reagent-state [:grid-spacing]
+       "Grid Spacing" 0.05 1000 0.05 0.2]
       [:hr]
       [:span 
-       "TODO Plot Mode: " [widgets/dropdown-input reagent-state [:plot-mode]
-                      "plot-mode-dropdown" [["Timeseries"  "Timeseries"]
-                                            ["X-Y Scatter" "X-Y Scatter"]
-                                            ["FFT" "FFT"]]]]]
+       "Plot Mode: (TODO) " [widgets/dropdown-input reagent-state [:plot-mode]
+                             "plot-mode-dropdown" [["Timeseries"  "Timeseries"]
+                                                   ["X-Y Scatter" "X-Y Scatter"]
+                                                   ["FFT" "FFT"]]]]]
      
      "Options" 
      [:div
@@ -171,10 +171,14 @@
 
 (init-reagent!)
 
+;; Temporary place to store the latest time
+;; (def (js/globalArray ))
+
 (defonce unused-animate-handle 
-  (anim/animate (fn [t] 
+  (anim/animate (fn [t]
                   (let [rs @reagent-state]
-                    (webgl/draw-frame! rs t)) true)))
+                    
+                    (webgl/draw-frame! rs (- t (get @reagent-state :t0 0.0)))) true)))
 
 
 
