@@ -58,7 +58,7 @@
                                [widgets/number-input reagent-state [:chans idx :position]
                                 "pos" -1E100 1E100 1.0 0.0]]
                               [:td
-                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position] 
+                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position]
                                                                        (partial +    (* 0.2 (get-in @reagent-state [:chans idx :scale ] 1.0))))} "+"]
                                [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position]
                                                                        (partial + (- (* 0.2 (get-in @reagent-state [:chans idx :scale ] 1.0)))))} "-"]
@@ -70,7 +70,7 @@
                                [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :scale] (fnil (partial * 2.0) 1.0))} "+"]
                                [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :scale] (fnil (partial * 0.5) 1.0))} "-"]
                                [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:chans idx :scale] 1.0)} "1"]]
-                              [:td 
+                              [:td
                                [:button.tiny-button "Auto"]]]])))))]]]))
 
 (defn top-bar
@@ -79,7 +79,7 @@
    [:tbody
     [:tr
      [:td [:button.oscope-button
-           {:on-click #(swap! reagent-state assoc :t0 0.0)}
+           {:on-click #(print "TODO!")}
            "Clear"]]
      [:td {:width "10px"}]
      [:td "Save:"]
@@ -160,25 +160,18 @@
   [:p (str @reagent-state)])
 
 (defn init-reagent! []
-  (r/render [top-bar]    (.getElementById js/document "reagent-top-bar"))
-  (r/render [right-bar]  (.getElementById js/document "reagent-right-bar"))
-  (r/render [bottom-bar] (.getElementById js/document "reagent-bottom-bar"))
+  (r/render [top-bar]     (.getElementById js/document "reagent-top-bar"))
+  (r/render [right-bar]   (.getElementById js/document "reagent-right-bar"))
+  (r/render [bottom-bar]  (.getElementById js/document "reagent-bottom-bar"))
   (r/render [page-bottom] (.getElementById js/document "reagent-page-bottom")))
-
 
 ;; -----------------------------------------------------------------------------
 ;; Now actually start everything!
 
 (init-reagent!)
 
-;; Temporary place to store the latest time
-;; (def (js/globalArray ))
-
 (defonce unused-animate-handle 
-  (anim/animate (fn [t]
-                  (let [rs @reagent-state]
-                    
-                    (webgl/draw-frame! rs (- t (get @reagent-state :t0 0.0)))) true)))
-
-
-
+  (anim/animate
+   (fn [t]
+     (webgl/draw-frame! @reagent-state t)
+     true)))

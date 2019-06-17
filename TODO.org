@@ -1,31 +1,31 @@
+* Loops
+** Data->GL object path
+   1. [ ] Ensure the data is not too old
+   2. [ ] Pure function. f(raw-data, reagent-chans) -> 
+** Draw loops
+   1. [ ] Expire old traces (easy cuz sorted)
+   2. [ ] Draw the existing traces that are {:checked}
+** Reagent
+   1. [ ] Uses the "channels" datastructure {:position, :scale, :checked}
+   2. [ ] When modified, rebuild all
+   3. [ ] If data is getting too stale, show that. 
+** Add loop -- from websocket or randomly for now
+   1. [ ] Add the fragment to raw-data, keeping it sorted
+
+
 * Plan
-  - [X] Bottom status bar
-  - [X] Tabs
-  - [ ] Enforce min, max values when using buttons
-  - [ ] Axes
-  - [ ] Grid
-  - [ ] Tics
-  - [ ] Orthographic view with x,y min and max
-  - [X] Horizontal Controls
-    - [X] Position +/-
-    - [X] Scale +/-
-    - [X] Zero
-  - [X] Vertical Controls, per channel
-    - [X] Position +/-
-    - [X] Scale +/-
-    - [X] Zero
-    - [X] Autorange button
-  - [ ] Text Labels in WebGL
-  - [-] Traces
-    - [ ] Listbox of all traces
-    - [X] List of active traces
   - [ ] Trace fragments
-    - [ ] Adding process
+    - [ ] Adding process (callback)
     - [ ] Expiration process
     - [ ] Check garbage collection
-  - [ ] Listbox of all traces
+  - [ ] Orthographic view with x, y min and max
+  - [ ] Make autoscale buttons work
+  - [ ] Text Labels in WebGL (for time sequences)
   - [ ] Clear all button
   - [ ] GL draw thicker traces
+  - [ ] Grep for TODOs
+  - [ ] Write README
+  - [ ] Code refactoring
 
 * For Write-Up
   - [ ] Release GIT hub

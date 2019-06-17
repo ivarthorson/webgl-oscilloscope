@@ -6,9 +6,8 @@
             [webgl-oscilloscope.webgl :as webgl]
             [webgl-oscilloscope.widgets :as widgets]))
 
-;; Traces are little collections of verticies that represent lines
-;; Represented as hashmaps:
-
+;; Traces are little collections of verticies that represent pieces of
+;; a continuous line
 
 (def traces (atom []))
 
@@ -34,8 +33,27 @@
   (< (last (:xs trace)) t_expire))
 
 (defn remove-expired-traces
-  [t_expire traces]
+  [traces t_expire]
   (vec (remove (partial expired? t_expire) traces)))
 
-;; (defn )
+(defn latest-trace-named
+  [traces name]
+  (->> traces
+       (filter (fn [h] (= name (:signal h))))
+       (sort-by (fn [h] (last (:xs h))))
+       (last)
+       ((fn [h] 
+          (last (:xs h))))))
 
+(defn add-demo-trace-fragment
+  [name t]
+  (let [from (latest-trace-named traces name)
+        to (+ 1.0 t)]
+    (swap! traces conj (make-sine-trace from to))))
+
+(comment
+  (let [t (get-the-current-time)]
+    (swap! add-demo-trace-fragment "Sine" (make-sine-trace))
+    (swap! traces remove-expired-traces t))
+
+)
