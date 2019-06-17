@@ -58,18 +58,24 @@
                                [widgets/number-input reagent-state [:chans idx :position]
                                 "pos" -1E100 1E100 1.0 0.0]]
                               [:td
-                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position]
-                                                                       (partial +    (* 0.2 (get-in @reagent-state [:chans idx :scale ] 1.0))))} "+"]
-                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :position]
-                                                                       (partial + (- (* 0.2 (get-in @reagent-state [:chans idx :scale ] 1.0)))))} "-"]
-                               [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:chans idx :position] 0)} "0"]]
+                               [:button.tiny-button {:on-click #(do (swap! reagent-state update-in [:chans idx :position]
+                                                                           (partial +    (* 0.2 (get-in @reagent-state [:chans idx :scale ] 1.0))))
+                                                                    (swap! traces/trace-chunks traces/delete-linestrips))} "+"]
+                               [:button.tiny-button {:on-click #(do (swap! reagent-state update-in [:chans idx :position]
+                                                                           (partial + (- (* 0.2 (get-in @reagent-state [:chans idx :scale ] 1.0)))))
+                                                                    (swap! traces/trace-chunks traces/delete-linestrips))} "-"]
+                               [:button.tiny-button {:on-click #(do (swap! reagent-state assoc-in [:chans idx :position] 0)
+                                                                    (swap! traces/trace-chunks traces/delete-linestrips))} "0"]]
                               [:td {:align "right"}
                                [widgets/number-input reagent-state [:chans idx :scale]
                                 "scl" 1e-100 1e100 1.0 1.0]]
                               [:td
-                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :scale] (fnil (partial * 2.0) 1.0))} "+"]
-                               [:button.tiny-button {:on-click #(swap! reagent-state update-in [:chans idx :scale] (fnil (partial * 0.5) 1.0))} "-"]
-                               [:button.tiny-button {:on-click #(swap! reagent-state assoc-in [:chans idx :scale] 1.0)} "1"]]
+                               [:button.tiny-button {:on-click #(do (swap! reagent-state update-in [:chans idx :scale] (fnil (partial * 2.0) 1.0))
+                                                                    (swap! traces/trace-chunks traces/delete-linestrips))} "+"]
+                               [:button.tiny-button {:on-click #(do (swap! reagent-state update-in [:chans idx :scale] (fnil (partial * 0.5) 1.0))
+                                                                    (swap! traces/trace-chunks traces/delete-linestrips))} "-"]
+                               [:button.tiny-button {:on-click #(do (swap! reagent-state assoc-in [:chans idx :scale] 1.0)
+                                                                    (swap! traces/trace-chunks traces/delete-linestrips))} "1"]]
                               [:td
                                [:button.tiny-button "Auto"]]]])))))]]]))
 
@@ -173,5 +179,5 @@
 (defonce unused-animate-handle 
   (anim/animate
    (fn [t]
-     (webgl/draw-frame! @reagent-state t)
+     (webgl/draw-frame! reagent-state traces/trace-chunks t)
      true)))

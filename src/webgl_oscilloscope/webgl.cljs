@@ -45,6 +45,7 @@
 ;; TODO: test if only one vertex need be on screen for this to draw, or not.
 (def x-axis (mapv vector (range -100 100 10) (repeat 0.0) (repeat 0.0)))
 (def y-axis (mapv vector (repeat 0.0) (range -100 100 10) (repeat 0.0)))
+
 (def grid (let [xmin -5.0 ;; Grid min/max
                 xmax  5.0 ;; Grid min/max
                 xg 0.1    ;; Grid spacing
@@ -75,19 +76,27 @@
       (update-in [:attribs] dissoc :color)
       (update-in [:uniforms] merge {:color rgba})))
 
-(def sine-wave (let [ts (range 0 314.0 0.01)
-                     wave (map #(Math/sin (* 5.0 %)) ts)]
-                 (map vector ts wave (repeat 0.0))))
+(defn to-webgl-linestrip
+  "  rs = {source, chan, pos, scl}
+  dat = [{chan, xyzs}
+  gl-linestrip-obj = f(rs, dat)"
+  [{:keys [position scale signal] :as reagent-state}
+   {:keys [xyzs] :as dat}]
+  (let [scale (or scale 1.0)
+        position (or position 0.0)]
+    (make-linestrip-obj (map (fn [[x y z]]
+                               [x (+ position (* y scale)) z])                             
+                             xyzs)
+                        [0 1 0 1])))
 
 (def x-axis-obj (make-linestrip-obj x-axis [1 1 1 1]))
 (def y-axis-obj (make-linestrip-obj y-axis [1 1 1 1]))
+
 (def grid-obj (make-linestrip-obj grid [0.2 0.2 0.2 1]))
 
-;; TODO: make objects and put them in the signals thing
-(def sine-obj (make-linestrip-obj sine-wave [0 1 1 1]))                  
-
-(defn draw-frame! [rs t]
-  (let [s @gl-state]
+(defn draw-frame! [reagent-state trace-chunks t]
+  (let [rs @reagent-state
+        s @gl-state]
     (when (:run rs)
       (swap! gl-state assoc-in [:camera :eye]    (thi.ng.geom.vector/vec3 t 0.0 4.0))
       (swap! gl-state assoc-in [:camera :target] (thi.ng.geom.vector/vec3 t 0.0 0.0)))
@@ -101,9 +110,19 @@
       (gl/draw-with-shader gl-ctx x-axis-obj)
       (gl/draw-with-shader gl-ctx y-axis-obj))
 
-    ;; TODO: make this a for loop for all signals
-    (when (get-in rs [:chans 0 :checked])
-      (gl/draw-with-shader gl-ctx (-> sine-obj
-                                      (cam/apply (cam/perspective-camera (:camera s)))
-                                      (update-in [:uniforms] merge
-                                                 {:color (color/color-rgba 0)}))))))
+    ;; Loop for all selected signals and for all trace chunks of those signals
+    (dotimes [i (count (get-in rs [:chans]))]
+      (when (get-in rs [:chans i :checked])
+        (let [chunks @trace-chunks]
+          (dotimes [j (count chunks)]     
+            (let [reagent-signal-hash (get-in rs [:chans i])
+                  raw-trace-hash  (get-in chunks [j])
+                  ;; Make a linestrip obj, if it does not already exist:
+                  linestrip-obj (or (get-in chunks [j :linestrip-obj])
+                                    (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash
+                                                                                raw-trace-hash)] 
+                                      (println "ha")
+                                      (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
+                                      new-linestrip-obj))]
+              (gl/draw-with-shader gl-ctx (-> linestrip-obj
+                                              (cam/apply (cam/perspective-camera (:camera s))))))))))))

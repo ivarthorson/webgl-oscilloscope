@@ -9,7 +9,15 @@
 ;; Traces are little collections of verticies that represent pieces of
 ;; a continuous line
 
-(def traces (atom []))
+(def trace-chunks (atom [{:signal "Sine"
+                          :xyzs (let [ts (range 0 314.0 0.01)
+                                      wave (map #(Math/sin (* 5.0 %)) ts)]
+                                  (map vector ts wave (repeat 0.0)))}]))
+
+(defn delete-linestrips
+  "The linestrips are stored as sub-keys of trace-chunks."
+  [chunks]
+  (mapv (fn [h] (dissoc h :linestrip-obj)) chunks))
 
 (defn make-sine-trace
   [from to & [sample-period]]
@@ -45,7 +53,7 @@
        ((fn [h] 
           (last (:xs h))))))
 
-(defn add-demo-trace-fragment
+#_ (defn add-demo-trace-fragment
   [name t]
   (let [from (latest-trace-named traces name)
         to (+ 1.0 t)]
