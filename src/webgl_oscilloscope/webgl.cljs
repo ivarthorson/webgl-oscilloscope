@@ -121,7 +121,6 @@
                   linestrip-obj (or (get-in chunks [j :linestrip-obj])
                                     (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash
                                                                                 raw-trace-hash)] 
-                                      (println "ha")
                                       (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
                                       new-linestrip-obj))]
               (gl/draw-with-shader gl-ctx (-> linestrip-obj
