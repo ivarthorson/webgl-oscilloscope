@@ -163,7 +163,9 @@
   [:div (str (:status-message @reagent-state))])
 
 (defn page-bottom []
-  [:p (str @reagent-state)])
+  [:p (str @reagent-state)]
+  ;;[:p (str @traces/trace-chunks)]
+  )
 
 (defn init-reagent! []
   (r/render [top-bar]     (.getElementById js/document "reagent-top-bar"))
@@ -179,5 +181,9 @@
 (defonce unused-animate-handle 
   (anim/animate
    (fn [t]
+     (traces/remove-expired-traces (- t 1.0))
+     ;; Have a 1 in 10 chance of adding new fragments.
+     (when (= (rand-int 10) 1)
+       (traces/add-demo-sine-fragment t))
      (webgl/draw-frame! reagent-state traces/trace-chunks t)
      true)))

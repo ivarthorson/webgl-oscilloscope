@@ -120,7 +120,7 @@
                   ;; Make a linestrip obj, if it does not already exist:
                   linestrip-obj (or (get-in chunks [j :linestrip-obj])
                                     (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash
-                                                                                raw-trace-hash)] 
+                                                                                raw-trace-hash)]
                                       (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
                                       new-linestrip-obj))]
               (gl/draw-with-shader gl-ctx (-> linestrip-obj

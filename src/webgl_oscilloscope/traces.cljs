@@ -9,23 +9,16 @@
 ;; Traces are little collections of verticies that represent pieces of
 ;; a continuous line
 
-(def trace-chunks (atom [{:signal "Sine"
-                          :xyzs (let [ts (range 0 314.0 0.01)
-                                      wave (map #(Math/sin (* 5.0 %)) ts)]
-                                  (map vector ts wave (repeat 0.0)))}]))
-
-(defn delete-linestrips
-  "The linestrips are stored as sub-keys of trace-chunks."
-  [chunks]
-  (mapv (fn [h] (dissoc h :linestrip-obj)) chunks))
-
 (defn make-sine-trace
   [from to & [sample-period]]
-  (let [xs (vec (range from to sample-period)) ]
+  (let [sample-period (or sample-period 0.02)
+        xs (vec (range from to sample-period)) 
+        ys (map #(Math/sin (* 5.0 %)) xs)
+        zs (repeat 0.0)
+        xyzs (mapv vector xs ys zs)]
    {:source "Demo"
     :signal "Sine"
-    :xs xs
-    :ys (mapv #(- (Math/sin %) 0.2) xs)}))
+    :xyzs xyzs}))
 
 (defn make-square-trace
   [from to & [sample-period]]
@@ -35,33 +28,47 @@
     :xs xs
     :ys (mapv #(Math/cos %) xs)}))
 
-(defn expired?
+(def trace-chunks (atom []))
+
+(defn- latest-time
+  "Returns the latest time of a trace chunk."
+  [trace]
+  (first (last (:xyzs trace))))
+
+(defn- expired?
   "Returns true when the signal is older than t_expire"
   [t_expire trace]
-  (< (last (:xs trace)) t_expire))
+  (< (latest-time trace) t_expire))
 
-(defn remove-expired-traces
-  [traces t_expire]
-  (vec (remove (partial expired? t_expire) traces)))
-
-(defn latest-trace-named
+(defn- latest-time-of
+  "Returns the latest time of any chunk that matches name."
   [traces name]
   (->> traces
        (filter (fn [h] (= name (:signal h))))
-       (sort-by (fn [h] (last (:xs h))))
+       (sort-by latest-time)
        (last)
-       ((fn [h] 
-          (last (:xs h))))))
+       (latest-time)))
 
-#_ (defn add-demo-trace-fragment
-  [name t]
-  (let [from (latest-trace-named traces name)
+;; -----------------------------------------------------------------------------
+;; PUBLIC THINGS
+
+(defn delete-linestrips
+  "The linestrips are stored as sub-keys of trace-chunks.
+  NOTE: linestrips are essentially cached and need to be invalidated when
+  you alter relevant display state in reagent state. "
+  [chunks]
+  (mapv (fn [h] (dissoc h :linestrip-obj)) chunks))
+
+(defn remove-expired-traces
+  [t_expire]
+  (swap! trace-chunks
+         (fn [chunks]
+           (vec (remove (partial expired? t_expire) chunks)))))
+
+(defn add-demo-sine-fragment
+  "Adds sine trace chunks as needed."
+  [t]
+  (let [from (or (latest-time-of @trace-chunks "Sine") 0)
         to (+ 1.0 t)]
-    (swap! traces conj (make-sine-trace from to))))
-
-(comment
-  (let [t (get-the-current-time)]
-    (swap! add-demo-trace-fragment "Sine" (make-sine-trace))
-    (swap! traces remove-expired-traces t))
-
-)
+    (when (and from to)
+      (swap! trace-chunks conj (make-sine-trace from to)))))
