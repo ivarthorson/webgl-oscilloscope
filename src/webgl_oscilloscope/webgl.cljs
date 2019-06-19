@@ -15,13 +15,32 @@
 
 (def gl-ctx (gl/gl-context "mainCanvas"))
 
+(defn make-grid
+  [grid-spacing]
+  (let [xmin -5.0
+        xmax  5.0
+        xg (* 0.5 grid-spacing)
+        ymin -5.0 
+        ymax  5.0 
+        yg grid-spacing]
+    (vec 
+     (concat      ;; TODO: This should be LINES type, but that doesn't exist in thi.ng/geom?
+      (apply concat (for [x (range xmin xmax (* 2.0 xg))] ;; Vertical lines of grid
+                      [[x ymin 0.0] [x ymax 0]
+                       [[(+ xg x) ymax 0] (+ x xg) ymin 0.0]]))
+
+      (apply concat (for [y (range ymin ymax (* 2.0 yg))] ;; Horizontal lines of grid
+                      [[xmin y 0.0] [xmax y 0]
+                       [xmax (+ yg y) 0] [xmin (+ yg y) 0.0 ]]))))))
+
 (def gl-state 
-  (atom {
-         :x-center     0.0
-         :x-scale      1.0
-         :y-center     0.0
-         :y-scale      1.0
-                          
+  (atom {:grid   {:xyzs (make-grid 0.2)
+                  :color [0.2 0.2 0.2 1]}
+         :x-axis {:xyzs (mapv vector (range -100 100 10) (repeat 0.0) (repeat 0.0))
+                  :color [1 1 1 1]}
+         :y-axis {:xyzs (mapv vector (repeat 0.0) (range -100 100 10) (repeat 0.0))
+                  :color [1 1 1 1]}
+
          :camera {:eye    (thi.ng.geom.vector/vec3 0.0 0.0 2.0)
                   :target (thi.ng.geom.vector/vec3 0.0 0.0 0.0)
                   :up     (thi.ng.geom.vector/vec3 0.0 1.0 0.0)
@@ -31,28 +50,7 @@
                   :far  1000               ;; far clip
                   }}))
 
-;; TODO: test if only one vertex need be on screen for this to draw, or not.
-(def x-axis (mapv vector (range -100 100 10) (repeat 0.0) (repeat 0.0)))
-(def y-axis (mapv vector (repeat 0.0) (range -100 100 10) (repeat 0.0)))
-
-(def grid (let [xmin -5.0 ;; Grid min/max
-                xmax  5.0 ;; Grid min/max
-                xg 0.1    ;; Grid spacing
-                ymin -5.0 
-                ymax  5.0 
-                yg 0.2]
-            ;; TODO: This should be LINES type, but that doesn't fucking exist?!
-            (vec 
-             (concat 
-              (apply concat (for [x (range xmin xmax (* 2.0 xg))] ;; Vertical lines of grid
-                              [[x ymin 0.0] [x ymax 0]
-                               [[(+ xg x) ymax 0] (+ x xg) ymin 0.0]]))
-
-              (apply concat (for [y (range ymin ymax (* 2.0 yg))] ;; Horizontal lines of grid
-                              [[xmin y 0.0] [xmax y 0]
-                               [xmax (+ yg y) 0] [xmin (+ yg y) 0.0 ]]))))))
-
-(defn make-linestrip-obj
+(defn- make-linestrip-obj
   "Given a list of xyz vectors, turn that into an object that can be drawn with gl/draw-with-shader"
   [xyz-vecs rgba]
   (-> xyz-vecs
@@ -65,8 +63,9 @@
       (update-in [:attribs] dissoc :color)
       (update-in [:uniforms] merge {:color rgba})))
 
-(defn to-webgl-linestrip
-  "  rs = {source, chan, pos, scl}
+(defn- to-webgl-linestrip
+  "TODO: RENAME THIS FUNCTION TO BE MORE SPECIFIC. IT IS ONLY USED BY _TRACES_...not general linestrip objs
+  rs = {source, chan, pos, scl}
   dat = [{chan, xyzs}
   gl-linestrip-obj = f(rs, dat)"
   [{:keys [position scale signal color] :as reagent-state}
@@ -79,10 +78,30 @@
                              xyzs)
                         color)))
 
-(def x-axis-obj (make-linestrip-obj x-axis [1 1 1 1]))
-(def y-axis-obj (make-linestrip-obj y-axis [1 1 1 1]))
+(defn get-linestrip-obj
+  "In short, this is a manual memoization of what's under linestrip-obj.
+  Gets the linestrip object from the hashmap sitting in STATE-ATOM at location PATH. 
+  If a :linestrip-obj key already exists, the contents of it is used.
+  If it doesn't exist, that a new linestrip object is created under :linestrip-obj, 
+  and is built using the :xyzs and :color properties. The new linestrip object is returned.
+  Optional argument COLOR lets you override the :color property."
+  [state-atom path & [color]]
+  (let [h (get-in @state-atom path {})]
+    (if-let [linestrip-obj (:linestrip-obj h)]
+      linestrip-obj
+      (let [c (or color (:color h) [1 1 1 1])
+            xyzs (:xyzs h)] 
+        (if-not xyzs
+          (println "WARNING: xyzs undefined for " path)
+          (or (get h :linestrip-obj)              
+              (let [new-linestrip-obj (make-linestrip-obj xyzs c)]
+                (swap! state-atom assoc-in (concat path [:linestrip-obj]) new-linestrip-obj)
+                new-linestrip-obj)))))))
 
-(def grid-obj (make-linestrip-obj grid [0.2 0.2 0.2 1]))
+(defn clear-linestrip-obj!
+  "Deletes a cached linestrip-obj, and garbage collects it."
+  []
+  :TODO)
 
 (defn draw-frame! [reagent-state trace-chunks t]
   (let [rs @reagent-state
@@ -94,11 +113,11 @@
     (gl/clear-color-and-depth-buffer gl-ctx 0 0 0 1 1)      
 
     (when (get-in rs [:show-grid])
-      (gl/draw-with-shader gl-ctx grid-obj))
+      (gl/draw-with-shader gl-ctx (get-linestrip-obj gl-state [:grid])))
     
     (when (get-in rs [:show-axes])
-      (gl/draw-with-shader gl-ctx x-axis-obj)
-      (gl/draw-with-shader gl-ctx y-axis-obj))
+      (gl/draw-with-shader gl-ctx (get-linestrip-obj gl-state [:x-axis]))
+      (gl/draw-with-shader gl-ctx (get-linestrip-obj gl-state [:y-axis])))
 
     ;; Loop for all selected signals and for all trace chunks of those signals
     (let [should-display? (into #{} (map :signal (filter :checked (:chans rs))))
@@ -107,11 +126,11 @@
         (let [trace (get-in chunks [j])
               trace-name (:signal trace)]
           (when (should-display? trace-name)
-           (let [reagent-signal-hash (first (filter #(= trace-name (:signal %)) (:chans rs)))  ;; TODO: Remove this searching process!
-                 ;; Make a linestrip obj, if it does not already exist:
-                 linestrip-obj (or (get-in chunks [j :linestrip-obj])
-                                   (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash trace)]
-                                     (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
-                                     new-linestrip-obj))]
-             (gl/draw-with-shader gl-ctx (-> linestrip-obj
-                                             (cam/apply (cam/perspective-camera (:camera s))))))))))))
+            (let [reagent-signal-hash (first (filter #(= trace-name (:signal %)) (:chans rs))) ;; TODO: Remove this searching process!
+                  ;; TODO: use (get-linestrip-obj) here instead, and pass the reagent-signal-hash color. 
+                  linestrip-obj (or (get-in chunks [j :linestrip-obj])
+                                    (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash trace)]
+                                      (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
+                                      new-linestrip-obj))]
+              (gl/draw-with-shader gl-ctx (-> linestrip-obj
+                                              (cam/apply (cam/perspective-camera (:camera s))))))))))))

@@ -146,8 +146,7 @@
       [:h4 "Visual Aids"]
       [widgets/simple-toggle reagent-state [:show-axes] "show-axes-toggle" "Show Axes"]   
       [widgets/simple-toggle reagent-state [:show-grid] "show-grid-toggle" "Show Grid"]
-      [widgets/number-input reagent-state [:grid-spacing]
-       "Grid Spacing" 0.05 1000 0.05 0.2]
+      [widgets/number-input reagent-state [:grid-spacing] "Grid Spacing" 0.05 1000 0.05 1.0]
       [:hr]
       [:span 
        "Plot Mode: (TODO) " [widgets/dropdown-input reagent-state [:plot-mode]
@@ -159,10 +158,8 @@
      [:div
       [:h4 "Connection Settings"]
       [widgets/text-input reagent-state [:server-url] "Server URL"  20]
-      [widgets/number-input reagent-state [:server-refresh]
-       "Refresh [Hz]" 0.1 100 1.0 10.0]
-      [:hr]
-      ]}]])
+      [widgets/number-input reagent-state [:server-refresh] "Refresh [Hz]" 0.1 100 1.0 10.0]
+      [:hr]]}]])
 
 (defn bottom-bar []
   [:div (str (:status-message @reagent-state))])
