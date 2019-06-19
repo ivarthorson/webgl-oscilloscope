@@ -107,11 +107,10 @@
         (let [trace (get-in chunks [j])
               trace-name (:signal trace)]
           (when (should-display? trace-name)
-           (let [reagent-signal-hash (first (filter #(= trace-name (:signal %)) (:chans rs)))
+           (let [reagent-signal-hash (first (filter #(= trace-name (:signal %)) (:chans rs)))  ;; TODO: Remove this searching process!
                  ;; Make a linestrip obj, if it does not already exist:
                  linestrip-obj (or (get-in chunks [j :linestrip-obj])
-                                   (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash
-                                                                               trace)]
+                                   (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash trace)]
                                      (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
                                      new-linestrip-obj))]
              (gl/draw-with-shader gl-ctx (-> linestrip-obj

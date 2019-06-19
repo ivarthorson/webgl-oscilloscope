@@ -1,28 +1,13 @@
-* Loops
-  rs = {source, chan, pos, scl}
-  dat = [{chan, xyzs}
-  gl-linestrip-obj = f(rs, dat)
-  
-** Data->GL object path
-   1. [ ] Ensure the data is not too old
-   2. [ ] Pure function. f(raw-data, reagent-chans) -> 
-** Draw loops
-   1. [ ] Expire old traces (easy cuz sorted)
-   2. [ ] Create
-   3. [ ] Draw the existing traces that are {:checked}
-** Reagent
-   1. [ ] Uses the "channels" datastructure {:position, :scale, :checked}
-   2. [ ] When modified, rebuild all
-   3. [ ] If data is getting too stale, show that. 
-** Add loop -- from websocket or randomly for now
-   1. [ ] Add the fragment to raw-data, keeping it sorted
-
+* Refactoring
+  - [ ] The display of the "scale" variable looks confusing to me. It should have "/div" after it. And "pos" is likewise a little weird.
+  - [ ] The camera should be zoomed out so the grid is actually perfect
+  - [ ] The grid spacing should reflect what reagent is set to do.
+  - [ ] The text entry inputs should respond to enter ke
+  - [ ] the text entry inputs should also erase cached linestrip buffers
+  - [ ] If there are many many traces coming in, we don't store all of them in the trace-chunks buffer; we just record that they exist in a second data structure.
+  - [ ] reagent ":chans" should probably be a hashmap keyed on a UUID of the traces, and should be built from that second data structure.
 
 * Plan
-  - [ ] Trace fragments
-    - [ ] Adding process (callback)
-    - [ ] Expiration process
-    - [ ] Check garbage collection
   - [ ] Orthographic view with x, y min and max
   - [ ] Make autoscale buttons work
   - [ ] Text Labels in WebGL (for time sequences)
@@ -31,6 +16,19 @@
   - [ ] Grep for TODOs
   - [ ] Write README
   - [ ] Code refactoring
+
+
+* Documentation
+** Definitions
+   "Traces" are little line-segments of data. They come as small pieces (chunks) of data (x-y-z coordinates) that arrive either via a websocket or via HTTP.
+   "Signals" are the collections of traces that are logically grouped together. Each signal will have many traces, and in most cases drawing all the traces together will produce a continuous line. 
+** Design Notes
+   The scrolling effect is created by moving the camera, not the traces. 
+   Traces are immutable; once created, they are drawn until they are destroyed. Usually they are destroyed when they are sufficiently old, although a user can also hit the "clear" button. 
+   Traces need to be converted into WebGL buffer objects to be drawn. The exact WebGL coordinates of a trace are dependent of the Y-position and Y-scale factors for that trace, so WebGL buffer conversion is a function of both the original trace and the reagent state scaling factors. In other words, f(trace, reagent-state) -> webgl_linestrip_buffer. WebGL linestrips are thus also immutable, but are deleted any time the reagent state buttons modify a display variable. They are recreated automatically as needed.
+
+* Robustness
+  - [ ] Ensure that the garbage collection of old webgl buffers is actually occurring
 
 * For Write-Up
   - [ ] Release GIT hub
