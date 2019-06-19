@@ -16,22 +16,11 @@
 (def gl-ctx (gl/gl-context "mainCanvas"))
 
 (def gl-state 
-  (atom {:time         0.0             ;; seconds
-         :time-history 200             ;; seconds
-         :time-lag     0.1             ;; seconds
-
+  (atom {
          :x-center     0.0
          :x-scale      1.0
          :y-center     0.0
          :y-scale      1.0
-                          
-         :grid        true
-         :grid-xticks  0.1
-         :grid-yticks  0.1
-
-         ;;         view-rect (gl/get-viewport-rect gl)
-         :viewport-width  1000
-         :viewport-height 600
                           
          :camera {:eye    (thi.ng.geom.vector/vec3 0.0 0.0 2.0)
                   :target (thi.ng.geom.vector/vec3 0.0 0.0 0.0)
@@ -80,14 +69,15 @@
   "  rs = {source, chan, pos, scl}
   dat = [{chan, xyzs}
   gl-linestrip-obj = f(rs, dat)"
-  [{:keys [position scale signal] :as reagent-state}
+  [{:keys [position scale signal color] :as reagent-state}
    {:keys [xyzs] :as dat}]
   (let [scale (or scale 1.0)
-        position (or position 0.0)]
+        position (or position 0.0)
+        color (or color [1 1 1 1])]
     (make-linestrip-obj (map (fn [[x y z]]
                                [x (+ position (* y scale)) z])                             
                              xyzs)
-                        [0 1 0 1])))
+                        color)))
 
 (def x-axis-obj (make-linestrip-obj x-axis [1 1 1 1]))
 (def y-axis-obj (make-linestrip-obj y-axis [1 1 1 1]))
@@ -111,17 +101,18 @@
       (gl/draw-with-shader gl-ctx y-axis-obj))
 
     ;; Loop for all selected signals and for all trace chunks of those signals
-    (dotimes [i (count (get-in rs [:chans]))]
-      (when (get-in rs [:chans i :checked])
-        (let [chunks @trace-chunks]
-          (dotimes [j (count chunks)]     
-            (let [reagent-signal-hash (get-in rs [:chans i])
-                  raw-trace-hash  (get-in chunks [j])
-                  ;; Make a linestrip obj, if it does not already exist:
-                  linestrip-obj (or (get-in chunks [j :linestrip-obj])
-                                    (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash
-                                                                                raw-trace-hash)]
-                                      (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
-                                      new-linestrip-obj))]
-              (gl/draw-with-shader gl-ctx (-> linestrip-obj
-                                              (cam/apply (cam/perspective-camera (:camera s))))))))))))
+    (let [should-display? (into #{} (map :signal (filter :checked (:chans rs))))
+          chunks @trace-chunks]
+      (dotimes [j (count chunks)]
+        (let [trace (get-in chunks [j])
+              trace-name (:signal trace)]
+          (when (should-display? trace-name)
+           (let [reagent-signal-hash (first (filter #(= trace-name (:signal %)) (:chans rs)))
+                 ;; Make a linestrip obj, if it does not already exist:
+                 linestrip-obj (or (get-in chunks [j :linestrip-obj])
+                                   (let [new-linestrip-obj (to-webgl-linestrip reagent-signal-hash
+                                                                               trace)]
+                                     (swap! trace-chunks assoc-in [j :linestrip-obj] new-linestrip-obj)
+                                     new-linestrip-obj))]
+             (gl/draw-with-shader gl-ctx (-> linestrip-obj
+                                             (cam/apply (cam/perspective-camera (:camera s))))))))))))

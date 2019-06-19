@@ -20,13 +20,17 @@
     :signal "Sine"
     :xyzs xyzs}))
 
-(defn make-square-trace
+(defn make-cosine-trace
   [from to & [sample-period]]
-  (let [xs (vec (range from to sample-period)) ]
+  (let [sample-period (or sample-period 0.02)
+        xs (vec (range from to sample-period)) 
+        ys (map #(Math/cos (* 5.0 %)) xs)
+        zs (repeat 0.0)
+        xyzs (mapv vector xs ys zs)]
    {:source "Demo"
     :signal "Cosine"
     :xs xs
-    :ys (mapv #(Math/cos %) xs)}))
+    :xyzs xyzs}))
 
 (def trace-chunks (atom []))
 
@@ -52,6 +56,12 @@
 ;; -----------------------------------------------------------------------------
 ;; PUBLIC THINGS
 
+(defn list-channels
+  []
+  (mapv (fn [trace]
+          {:source (:source trace) 
+           :signal (:signal trace)}) @trace-chunks))
+
 (defn delete-linestrips
   "The linestrips are stored as sub-keys of trace-chunks.
   NOTE: linestrips are essentially cached and need to be invalidated when
@@ -59,16 +69,28 @@
   [chunks]
   (mapv (fn [h] (dissoc h :linestrip-obj)) chunks))
 
-(defn remove-expired-traces
+(defn remove-expired-traces!
   [t_expire]
   (swap! trace-chunks
          (fn [chunks]
            (vec (remove (partial expired? t_expire) chunks)))))
 
+(defn remove-all-traces!
+  "Removes all traces and resets the history."
+  []
+  (reset! trace-chunks []))
+
 (defn add-demo-sine-fragment
   "Adds sine trace chunks as needed."
   [t]
-  (let [from (or (latest-time-of @trace-chunks "Sine") 0)
-        to (+ 1.0 t)]
+  (let [from (or (latest-time-of @trace-chunks "Sine") t)
+        to (+ 3.0 t)]
     (when (and from to)
       (swap! trace-chunks conj (make-sine-trace from to)))))
+
+(defn add-demo-cosine-fragment
+  [t]
+  (let [from (or (latest-time-of @trace-chunks "Cosine") t)
+        to (+ 3.0 t)]
+    (when (and from to)
+      (swap! trace-chunks conj (make-cosine-trace from to)))))

@@ -12,12 +12,17 @@
 
            :status-message "Connecting to http://localhost:3000/websocket..."
                             
-           :chans [{:source "Demo" :signal "Sine"   :checked true}
-                   {:source "Demo" :signal "Square"}
-                   {:source "Demo" :signal "Triangle"}]
+           :chans [{:signal "Sine"   :checked true :color [1 0 0 1]}
+                   {:signal "Cosine" :color [0 1 0 1]} ]
                             
            :show-axes true
            :show-grid true
+
+           :time-history 200             ;; seconds
+           :time-lag     0.1             ;; seconds
+           
+           :viewport-width  1000
+           :viewport-height 600
 
            :right-bar-tab "Signals"
 
@@ -48,7 +53,7 @@
                                         :style {:color (if (get-in @reagent-state [:chans idx :checked] false)
                                                          (color/color-idx idx)
                                                          (color/light-gray))} }
-                                 (str source " / " signal)]]]]
+                                 (str signal)]]]]
                              
                              ;; Second row
                              ^{:key (str "checkbox-chan-control-row-" idx) }
@@ -85,7 +90,7 @@
    [:tbody
     [:tr
      [:td [:button.oscope-button
-           {:on-click #(print "TODO!")}
+           {:on-click #(traces/remove-all-traces!)}
            "Clear"]]
      [:td {:width "10px"}]
      [:td "Save:"]
@@ -181,9 +186,14 @@
 (defonce unused-animate-handle 
   (anim/animate
    (fn [t]
-     (traces/remove-expired-traces (- t 1.0))
+     (when (:run @reagent-state)
+      (traces/remove-expired-traces! (- t 3.0)))
      ;; Have a 1 in 10 chance of adding new fragments.
      (when (= (rand-int 10) 1)
-       (traces/add-demo-sine-fragment t))
+;;       (print traces/trace-chunks)
+       (traces/add-demo-sine-fragment t)
+       (traces/add-demo-cosine-fragment t)
+       ;; TODO: Rebuild the channel list
+       )
      (webgl/draw-frame! reagent-state traces/trace-chunks t)
      true)))
