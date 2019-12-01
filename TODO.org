@@ -17,7 +17,6 @@
   - [ ] Write README
   - [ ] Code refactoring
 
-
 * Documentation
 ** Definitions
    "Traces" are little line-segments of data. They come as small pieces (chunks) of data (x-y-z coordinates) that arrive either via a websocket or via HTTP.

@@ -74,7 +74,7 @@
         position (or position 0.0)
         color (or color [1 1 1 1])]
     (make-linestrip-obj (map (fn [[x y z]]
-                               [x (+ position (* y scale)) z])                             
+                               [x (+ position (/ y scale)) z])                             
                              xyzs)
                         color)))
 
